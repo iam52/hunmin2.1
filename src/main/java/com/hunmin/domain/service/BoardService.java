@@ -107,7 +107,6 @@ public class BoardService {
 
             Board board = Board.builder()
                     .member(member)
-                    .nickname(member.getNickname())
                     .title(boardRequestDTO.getTitle())
                     .content(boardRequestDTO.getContent())
                     .location(boardRequestDTO.getLocation())
