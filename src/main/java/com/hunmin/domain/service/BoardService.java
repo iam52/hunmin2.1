@@ -134,7 +134,7 @@ public class BoardService {
             return cachedBoard;
         }
 
-        Board board = boardRepository.findByIdWithComments(boardId).orElseThrow(BoardException.NOT_FOUND::get);
+        Board board = boardRepository.findCommentsByBoardId(boardId).orElseThrow(BoardException.NOT_FOUND::get);
         BoardResponseDTO boardResponseDTO = new BoardResponseDTO(board);
 
         hashOps.put("board", String.valueOf(boardId), boardResponseDTO);

@@ -59,6 +59,7 @@ public class Member extends BaseTimeEntity {
     public void addFollower(Follow follower) {
         followers.add(follower);
     }
+
     public void removeFollower(Follow follower) {
         followers.remove(follower);
     }

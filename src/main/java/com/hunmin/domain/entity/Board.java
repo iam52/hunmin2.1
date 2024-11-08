@@ -1,12 +1,21 @@
 package com.hunmin.domain.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Comments;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -26,9 +35,6 @@ public class Board extends BaseTimeEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
-    private String nickname;
-
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
@@ -41,15 +47,15 @@ public class Board extends BaseTimeEntity {
     @ElementCollection
     @CollectionTable(name = "board_image_urls", joinColumns = @JoinColumn(name = "board_id"))
     @Column(name = "image_urls", columnDefinition = "TEXT", nullable = false)
-    private List<String> imageUrls;
+    @Size(max = 10)
+    private List<String> imageUrls = new ArrayList<>();
 
     @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 100)
-    @Fetch(FetchMode.SUBSELECT)
-    private List<Comment> comments;
+    private final List<Comment> comments = new ArrayList<>();
 
-    public void changeTitle(String title) {
-        this.title = title;
+    public void changeTitle(@NotBlank String title) {
+        this.title = Objects.requireNonNull(title, "제목은 필수입니다.");
     }
 
     public void changeContent(String content) {
@@ -69,13 +75,28 @@ public class Board extends BaseTimeEntity {
     }
 
     public void changeImgUrls(List<String> imageUrls) {
-        this.imageUrls = imageUrls;
+        this.imageUrls = new ArrayList<>(imageUrls);
     }
 
-    public Board(Long boardId, Member member, String title, String content) {
-        this.boardId = boardId;
-        this.member = member;
-        this.title = title;
-        this.content = content;
+    public String getNickname() {
+        return this.member.getNickname();
+    }
+
+    public void addImageUrl(String url) {
+        this.imageUrls.add(url);
+    }
+
+    public List<String> getImageUrls() {
+        return Collections.unmodifiableList(imageUrls);
+    }
+
+    public List<Comment> getComments() {
+        return Collections.unmodifiableList(comments);
+    }
+
+    public List<Comment> getComments(int page, int size) {
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, comments.size());
+        return new ArrayList<>(comments.subList(fromIndex, toIndex));
     }
 }

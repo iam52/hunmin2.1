@@ -17,7 +17,7 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardSearch
 
     //게시글과 댓글을 같이 조회
     @Query("SELECT b FROM Board b LEFT JOIN FETCH b.comments WHERE b.boardId = :boardId")
-    Optional<Board> findByIdWithComments(@Param("boardId") Long boardId);
+    Optional<Board> findCommentsByBoardId(@Param("boardId") Long boardId);
 
     //회원 별 게시글 수 조회
     @Query("SELECT COUNT(*) FROM Board b  WHERE b.member.memberId =:memberId ")
