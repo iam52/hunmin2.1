@@ -43,8 +43,6 @@ public class QBoard extends EntityPathBase<Board> {
 
     public final QMember member;
 
-    public final StringPath nickname = createString("nickname");
-
     public final StringPath title = createString("title");
 
     //inherited
