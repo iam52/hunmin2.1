@@ -34,34 +34,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    // 이미지 업로드
-    public String uploadImage(MultipartFile file) throws IOException {
-        String uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString();
-        File directory = new File(uploadDir);
-
-        if (!directory.exists()) {
-            boolean created = directory.mkdirs();
-            if (!created) {
-                throw new IOException("Failed to create directory");
-            }
-        }
-
-        String fileName = UUID.randomUUID() + "." + getFileExtension(file.getOriginalFilename());
-        Path filePath = Paths.get(uploadDir, fileName);
-        Files.copy(file.getInputStream(), filePath);
-
-        return "/uploads/" + fileName;
-    }
-
-    // 파일 확장자 추출
-    private String getFileExtension(String fileName) {
-        if (fileName == null || !fileName.contains(".")) {
-            throw new IllegalArgumentException("Invalid file name: " + fileName);
-        }
-
-        return fileName.substring(fileName.lastIndexOf('.') + 1);
-    }
-
     // 회원 가입
     public void registerProcess(MemberDTO memberDTO) {
         String email = memberDTO.getEmail();
@@ -86,7 +58,6 @@ public class MemberService {
 
         memberRepository.save(member);
     }
-
     // 회원 정보 업데이트
     public void updateMember(Long id, MemberDTO memberDTO) {
         Optional<Member> optionalMember = memberRepository.findById(id);
@@ -116,12 +87,12 @@ public class MemberService {
             throw new RuntimeException("회원 정보를 찾을 수 없습니다.");
         }
     }
-
     public MemberDTO readUserInfo(String email) {
         return new MemberDTO(memberRepository.findByEmail(email));
     }
-    
+
     // 비밀번호 재설정을 위한 사용자 검증
+
     public ResponseEntity<?> verifyUserForPasswordReset(PasswordFindRequestDto passwordFindRequestDto) {
         boolean userExists = memberRepository.existsByEmailAndNickname(
                 passwordFindRequestDto.getEmail(), passwordFindRequestDto.getNickname());
@@ -132,8 +103,8 @@ public class MemberService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다.");
         }
     }
-
     // 비밀번호 재설정
+
     public ResponseEntity<?> updatePassword(PasswordUpdateRequestDto passwordUpdateRequestDto) {
         try {
             Member member = memberRepository.findUserByEmailAndNickname(
@@ -151,5 +122,29 @@ public class MemberService {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+    }
+
+    // 이미지 업로드
+    public String uploadImage(MultipartFile file) throws IOException {
+        String uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString();
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            boolean created = directory.mkdirs();
+            if (!created) {
+                throw new IOException("Failed to create directory");
+            }
+        }
+        String fileName = UUID.randomUUID() + "." + getFileExtension(file.getOriginalFilename());
+        Path filePath = Paths.get(uploadDir, fileName);
+        Files.copy(file.getInputStream(), filePath);
+        return "/uploads/" + fileName;
+    }
+
+    // 파일 확장자 추출
+    private String getFileExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            throw new IllegalArgumentException("Invalid file name: " + fileName);
+        }
+        return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
 }

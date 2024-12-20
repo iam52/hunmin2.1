@@ -13,26 +13,26 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    // 회원 정보 조회
+    // 기본 단일 조회
     Optional<Member> findByEmail(String email);
+    Optional<Member> findByNickname(String nickname);
 
-    // 중복 체크
+    // 중복 검사
     boolean existsByEmail(String email);
     boolean existsByNickname(String nickname);
 
-    // 닉네임으로 조회
-    Optional<Member> findByNickname(String nickname);
+    // 조건 조회
+    Optional<Member> findByEmailAndNickname(String email, String nickname);
 
-    @Query("SELECT m FROM ChatRoom c join c.member m on c.chatRoomId= :chatRoomId")
-    Optional<Member> findByChatRoomId(@Param("chatRoomId") Long chatRoomId);
+    // 페이징된 전체 회원 조회
+    @Query("SELECT m FROM Member m ORDER BY m.createdAt DESC")
+    Page<Member> findAllMembers(Pageable pageable);
 
-    // 비밀번호 찾기/변경 메서드
-    Optional<Member> findUserByEmailAndNickname(String email, String nickname);
-    boolean existsByEmailAndNickname(String email, String nickname);
+    // 팔로워 목록 조회
+    @Query("SELECT m FROM Member m JOIN Follow f ON f.follower = m WHERE f.followee.memberId = :memberId")
+    Page<Member> findFollowers(@Param("memberId") Long memberId, Pageable pageable);
 
-    Optional<Member> findByNicknameAndEmail(String nickname, String email);
-
-    //모든 멤버 리스트로 조회
-    Page<Member> findAll(Pageable pageable);
-
+    // 팔로잉 목록 조회
+    @Query("SELECT m FROM Member m JOIN Follow f On f.followee = m WHERE f.follower.memberId = :memberId")
+    Page<Member> findFollowees(@Param("memberId") Long memberId, Pageable pageable);
 }
