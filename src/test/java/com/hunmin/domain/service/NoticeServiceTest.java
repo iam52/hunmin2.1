@@ -5,17 +5,16 @@ import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.MemberLevel;
 import com.hunmin.domain.entity.MemberRole;
 import com.hunmin.domain.entity.Notice;
-import com.hunmin.domain.exception.NoticeException;
-import com.hunmin.domain.exception.NoticeTaskException;
 import com.hunmin.domain.repository.MemberRepository;
 import com.hunmin.domain.repository.NoticeRepository;
+import com.hunmin.global.exception.CustomException;
+import com.hunmin.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -79,7 +78,6 @@ class NoticeServiceTest {
     void getAllNotices() {
         //given
         NoticePageRequestDTO pageRequestDTO = new NoticePageRequestDTO();
-
         //when
         Page<NoticeResponseDTO> notices = noticeService.getAllNotices(pageRequestDTO);
         //then
@@ -93,10 +91,8 @@ class NoticeServiceTest {
         //given
         Notice findNotice = savedNotices.get(0);
         Long noticeId= findNotice.getNoticeId();
-
         //when
         NoticeResponseDTO findNoticeResponse = noticeService.getNoticeById(noticeId);
-
         //then
         assertThat(findNoticeResponse).isNotNull();
         assertThat(findNoticeResponse.getNoticeId()).isEqualTo(noticeId);
@@ -112,10 +108,8 @@ class NoticeServiceTest {
         NoticeRequestDTO noticeRequestDTO = new NoticeRequestDTO();
         noticeRequestDTO.setTitle("Test Notice");
         noticeRequestDTO.setContent("This is a test notice.");
-
         //when
         NoticeResponseDTO noticeResponse = noticeService.createNotice(noticeRequestDTO, userEmail);
-
         //then
         assertThat(noticeResponse).isNotNull();
         assertThat(noticeResponse.getTitle()).isEqualTo(noticeRequestDTO.getTitle());
@@ -135,11 +129,9 @@ class NoticeServiceTest {
         noticeRequestDTO.setTitle("공지제목");
         noticeRequestDTO.setContent("공지내용");
 
-
-
         assertThatThrownBy(() -> noticeService.createNotice(noticeRequestDTO,userEmail))
-                .isInstanceOf(NoticeTaskException.class)
-                .hasMessage(NoticeException.MEMBER_NOT_VALID.get().getMessage());
+                .isInstanceOf(CustomException.class)
+                .hasMessage(ErrorCode.MEMBER_INVALID.throwException().getMessage());
     }
 
     @Test
@@ -148,21 +140,16 @@ class NoticeServiceTest {
         //given
         String userEmail = savedMembers.get(1).getEmail();
         Long noticeId = savedNotices.get(3).getNoticeId();
-
         NoticeUpdateDTO noticeUpdateDTO = new NoticeUpdateDTO();
         noticeUpdateDTO.setTitle("제목수정");
         noticeUpdateDTO.setContent("내용수정");
-
-
         //when
         NoticeResponseDTO noticeUpdateResponse = noticeService.updateNotice(noticeUpdateDTO, userEmail, noticeId);
-
         //then
         assertThat(noticeUpdateResponse).isNotNull();
         assertThat(noticeUpdateResponse.getNoticeId()).isEqualTo(noticeId);
         assertThat(noticeUpdateResponse.getTitle()).isEqualTo(noticeUpdateDTO.getTitle());
         assertThat(noticeUpdateResponse.getContent()).isEqualTo(noticeUpdateDTO.getContent());
-
         //DB에 저장되었나 확인
         NoticeResponseDTO findNoticeById = noticeService.getNoticeById(noticeUpdateResponse.getNoticeId());
         assertThat(findNoticeById.getTitle()).isEqualTo(noticeUpdateDTO.getTitle());
@@ -182,8 +169,8 @@ class NoticeServiceTest {
         noticeUpdateDTO.setContent("내용수정");
 
         assertThatThrownBy(() -> noticeService.updateNotice(noticeUpdateDTO, userEmail, noticeId))
-                .isInstanceOf(NoticeTaskException.class)
-                .hasMessage(NoticeException.MEMBER_NOT_VALID.get().getMessage());
+                .isInstanceOf(CustomException.class)
+                .hasMessage(ErrorCode.MEMBER_INVALID.throwException().getMessage());
     }
 
     @Test
@@ -194,16 +181,11 @@ class NoticeServiceTest {
         String findUser = savedMembers.get(8).getEmail();
         Long findNoticeId = savedNotices.get(3).getNoticeId();
         Notice findNotice = noticeRepository.findById(findNoticeId).get();
-
-        //given
-
         //when
         noticeService.deleteNotice(findNoticeId,findAdmin);
-
         assertThatThrownBy(() -> noticeService.deleteNotice(findNoticeId,findUser))
-                .isInstanceOf(NoticeTaskException.class)
-                .hasMessage(NoticeException.MEMBER_NOT_VALID.get().getMessage());
-
+                .isInstanceOf(CustomException.class)
+                .hasMessage(ErrorCode.MEMBER_INVALID.throwException().getMessage());
         //then
         assertThat(noticeRepository.findById(findNotice.getNoticeId())).isEmpty();
     }

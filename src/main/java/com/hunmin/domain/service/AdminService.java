@@ -7,11 +7,10 @@ import com.hunmin.domain.dto.page.PageRequestDTO;
 import com.hunmin.domain.entity.Board;
 import com.hunmin.domain.entity.Comment;
 import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.exception.AdminException;
-import com.hunmin.domain.exception.MemberException;
 import com.hunmin.domain.repository.BoardRepository;
 import com.hunmin.domain.repository.CommentRepository;
 import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.*;
@@ -33,28 +32,18 @@ public class AdminService {
 
     //회원 검색
     public MemberStatusDTO getMemberByMemberId(Long memberId) {
-        try {
-            Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NOT_FOUND::get);
-            int boardCount = boardRepository.countByMemberId(member.getMemberId());
-            int commentCount = commentRepository.countByMemberId(member.getMemberId());
-            return new MemberStatusDTO(member, boardCount, commentCount);
-        } catch (Exception e) {
-            log.error("getMemberByMemberId : {}", e.getMessage());
-            throw MemberException.NOT_FOUND.get();
-        }
+        Member member = memberRepository.findById(memberId).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        int boardCount = boardRepository.countByMemberId(member.getMemberId());
+        int commentCount = commentRepository.countByMemberId(member.getMemberId());
+        return new MemberStatusDTO(member, boardCount, commentCount);
     }
 
     //회원 닉네임으로 검색
     public MemberStatusDTO getMemberByNickname(String username) {
-        try {
-            Member member = memberRepository.findByNickname(username).orElseThrow(MemberException.NOT_FOUND::get);
-            int boardCount = boardRepository.countByMemberId(member.getMemberId());
-            int commentCount = commentRepository.countByMemberId(member.getMemberId());
-            return new MemberStatusDTO(member, boardCount, commentCount);
-        } catch (Exception e) {
-            log.error("getMemberByNickname : {}", e.getMessage());
-            throw MemberException.NOT_FOUND.get();
-        }
+        Member member = memberRepository.findByNickname(username).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        int boardCount = boardRepository.countByMemberId(member.getMemberId());
+        int commentCount = commentRepository.countByMemberId(member.getMemberId());
+        return new MemberStatusDTO(member, boardCount, commentCount);
     }
 
     //회원 목록 조회
@@ -69,7 +58,7 @@ public class AdminService {
             });
         } catch (Exception e) {
             log.error("getAllMembers : {}", e.getMessage());
-            throw AdminException.MEMBERS_NOT_FOUND.get();
+            throw ErrorCode.MEMBER_NOT_FOUND.throwException();
         }
     }
 
@@ -91,7 +80,7 @@ public class AdminService {
             return new PageImpl<>(boardResponseDTOs, pageable, boardPage.getTotalElements());
         } catch (Exception e) {
             log.error("getBoardsByMemberId : {}", e.getMessage());
-            throw AdminException.BOARDS_NOT_FOUND.get();
+            throw ErrorCode.BOARD_NOT_FOUND.throwException();
         }
     }
 
@@ -114,7 +103,7 @@ public class AdminService {
             return new PageImpl<>(commentResponseDTOs, pageable, commentPage.getTotalElements());
         } catch (Exception e) {
             log.error("getCommentsByMemberId : {}", e.getMessage());
-            throw AdminException.COMMENTS_NOT_FOUND.get();
+            throw ErrorCode.COMMENT_NOT_FOUND.throwException();
         }
     }
 }

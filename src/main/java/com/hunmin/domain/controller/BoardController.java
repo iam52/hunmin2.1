@@ -3,7 +3,6 @@ package com.hunmin.domain.controller;
 import com.hunmin.domain.dto.board.BoardRequestDTO;
 import com.hunmin.domain.dto.board.BoardResponseDTO;
 import com.hunmin.domain.dto.page.PageRequestDTO;
-import com.hunmin.domain.exception.BoardException;
 import com.hunmin.domain.repository.BoardRepository;
 import com.hunmin.domain.repository.MemberRepository;
 import com.hunmin.domain.service.BoardService;

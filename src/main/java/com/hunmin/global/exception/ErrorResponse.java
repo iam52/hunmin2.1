@@ -1,11 +1,11 @@
-package com.hunmin.domain.exception;
+package com.hunmin.global.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class MemberTaskException extends RuntimeException {
+public class ErrorResponse {
     private String message;
     private int code;
 }

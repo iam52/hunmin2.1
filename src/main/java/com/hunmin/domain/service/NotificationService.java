@@ -4,8 +4,6 @@ import com.hunmin.domain.dto.notification.NotificationResponseDTO;
 import com.hunmin.domain.dto.notification.NotificationSendDTO;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.Notification;
-import com.hunmin.domain.exception.MemberException;
-import com.hunmin.domain.exception.NotificationException;
 import com.hunmin.domain.handler.SseEmitters;
 import com.hunmin.domain.repository.MemberRepository;
 import com.hunmin.domain.repository.NotificationRepository;

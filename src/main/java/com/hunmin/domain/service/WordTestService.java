@@ -1,19 +1,15 @@
 package com.hunmin.domain.service;
 
-import com.hunmin.domain.dto.word.WordRequestDTO;
 import com.hunmin.domain.dto.word.WordResponseDTO;
 import com.hunmin.domain.dto.word.WordScoreRequestDTO;
 import com.hunmin.domain.dto.word.WordScoreResponseDTO;
 import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.entity.MemberRole;
 import com.hunmin.domain.entity.Word;
 import com.hunmin.domain.entity.WordScore;
-import com.hunmin.domain.exception.WordException;
 import com.hunmin.domain.repository.MemberRepository;
 import com.hunmin.domain.repository.WordRepository;
 import com.hunmin.domain.repository.WordScoreRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;

@@ -4,10 +4,9 @@ import com.hunmin.domain.dto.notice.*;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.MemberRole;
 import com.hunmin.domain.entity.Notice;
-import com.hunmin.domain.exception.MemberException;
-import com.hunmin.domain.exception.NoticeException;
 import com.hunmin.domain.repository.MemberRepository;
 import com.hunmin.domain.repository.NoticeRepository;
+import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,13 +38,13 @@ public class NoticeService {
             return noticePage.map(NoticeResponseDTO::new);
         }catch (Exception e){
             log.error("getAllNotices error: {}",  e.getMessage());
-            throw NoticeException.NOTICE_NOT_FOUND.get();
+            throw ErrorCode.NOTICE_NOT_FOUND.throwException();
         }
     }
 
     //공지사항 조회
     public NoticeResponseDTO getNoticeById(Long noticeId) {
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(NoticeException.NOTICE_NOT_FOUND::get);
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(ErrorCode.NOTICE_NOT_FOUND::throwException);
         return new NoticeResponseDTO(notice);
     }
 
@@ -54,7 +54,7 @@ public class NoticeService {
 
         //관리자 아닐경우 예외 발생
         if (!member.getMemberRole().equals(MemberRole.ADMIN)) {
-            throw NoticeException.MEMBER_NOT_VALID.get();
+            throw ErrorCode.MEMBER_INVALID.throwException();
         }
             try {
                 Notice notice = noticeRequestDTO.toEntity(member);
@@ -63,7 +63,7 @@ public class NoticeService {
                 return new NoticeResponseDTO(savedNotice);
             }catch (Exception e) {
                 log.error("createNotice error: {}",  e.getMessage());
-                throw NoticeException.NOTICE_NOT_CREATED.get();
+                throw ErrorCode.NOTICE_CREATE_FAIL.throwException();
             }
     }
 
@@ -72,9 +72,9 @@ public class NoticeService {
         Member member = getMember(username);
         //관리자 아닐경우 예외 발생
         if (!member.getMemberRole().equals(MemberRole.ADMIN)) {
-            throw NoticeException.MEMBER_NOT_VALID.get();
+            throw ErrorCode.MEMBER_INVALID.throwException();
         }
-        Notice notice = noticeRepository.findById(noticeId).orElseThrow(NoticeException.NOTICE_NOT_FOUND::get);
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(ErrorCode.NOTICE_NOT_FOUND::throwException);
 
         try{
             notice.changeTitle(noticeUpdateDTO.getTitle());
@@ -83,7 +83,7 @@ public class NoticeService {
             return new NoticeResponseDTO(notice);
         }catch (Exception e){
             log.error("updateNotice error: {}",  e.getMessage());
-            throw NoticeException.NOTICE_NOT_UPDATED.get();
+            throw ErrorCode.NOTICE_UPDATE_FAIL.throwException();
         }
     }
 
@@ -94,23 +94,23 @@ public class NoticeService {
         Member member = getMember(username);
         //관리자 아닐경우 예외 발생
         if (!member.getMemberRole().equals(MemberRole.ADMIN)) {
-            throw NoticeException.MEMBER_NOT_VALID.get();
+            throw ErrorCode.MEMBER_INVALID.throwException();
         }
-        noticeRepository.findById(noticeId).orElseThrow(NoticeException.NOTICE_NOT_FOUND::get);
+        noticeRepository.findById(noticeId).orElseThrow(ErrorCode.NOTICE_NOT_FOUND::throwException);
         try {
             noticeRepository.deleteById(noticeId);
             return true;
         }catch (Exception e) {
             log.error("deleteNotice error: {}",  e.getMessage());
-            throw NoticeException.NOTICE_NOT_DELETED.get();
+            throw ErrorCode.NOTICE_DELETE_FAIL.throwException();
         }
     }
 
     private Member getMember(String username) {
-        Member member = memberRepository.findByEmail(username);
-        if (member == null) {
-            throw MemberException.NOT_FOUND.get();
+        Optional<Member> member = memberRepository.findByEmail(username);
+        if (member.isEmpty()) {
+            throw ErrorCode.MEMBER_NOT_FOUND.throwException();
         }
-        return member;
+        return member.orElse(null);
     }
 }

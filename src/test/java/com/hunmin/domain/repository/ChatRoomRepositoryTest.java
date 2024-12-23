@@ -3,7 +3,6 @@ package com.hunmin.domain.repository;
 import com.hunmin.domain.dto.chat.ChatRoomDTO;
 import com.hunmin.domain.dto.chat.MessageType;
 import com.hunmin.domain.entity.*;
-import com.hunmin.domain.exception.ChatRoomException;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

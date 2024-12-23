@@ -7,8 +7,6 @@ import com.hunmin.domain.entity.Follow;
 import com.hunmin.domain.entity.FollowStatus;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.NotificationType;
-import com.hunmin.domain.exception.FollowException;
-import com.hunmin.domain.exception.MemberException;
 import com.hunmin.domain.handler.SseEmitters;
 import com.hunmin.domain.repository.FollowRepository;
 import com.hunmin.domain.repository.MemberRepository;
