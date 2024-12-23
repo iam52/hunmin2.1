@@ -1,6 +1,7 @@
 package com.hunmin.domain.controller.advice;
 
 import com.hunmin.domain.exception.*;
+import com.hunmin.global.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

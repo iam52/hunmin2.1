@@ -1,11 +1,11 @@
-package com.hunmin.domain.exception;
+package com.hunmin.global.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class LikeCommentTaskException extends RuntimeException {
+public class CustomException extends RuntimeException {
     private String message;
     private int code;
 }

@@ -7,8 +7,6 @@ import com.hunmin.domain.dto.notification.NotificationSendDTO;
 import com.hunmin.domain.entity.ChatRoom;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.NotificationType;
-import com.hunmin.domain.exception.ChatRoomException;
-import com.hunmin.domain.exception.MemberException;
 import com.hunmin.domain.handler.SseEmitters;
 import com.hunmin.domain.repository.ChatRoomRepository;
 import com.hunmin.domain.repository.MemberRepository;

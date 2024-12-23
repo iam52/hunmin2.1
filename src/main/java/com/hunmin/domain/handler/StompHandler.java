@@ -3,7 +3,6 @@ package com.hunmin.domain.handler;
 import com.hunmin.domain.dto.chat.ChatMessageDTO;
 import com.hunmin.domain.dto.member.CustomUserDetails;
 import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.exception.MemberException;
 import com.hunmin.domain.jwt.JWTUtil;
 import com.hunmin.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;

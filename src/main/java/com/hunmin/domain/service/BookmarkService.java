@@ -4,15 +4,11 @@ import com.hunmin.domain.dto.board.BoardResponseDTO;
 import com.hunmin.domain.entity.Bookmark;
 import com.hunmin.domain.entity.Board;
 import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.exception.BoardException;
-import com.hunmin.domain.exception.BookmarkException;
-import com.hunmin.domain.exception.MemberException;
 import com.hunmin.domain.repository.BookmarkRepository;
 import com.hunmin.domain.repository.BoardRepository;
 import com.hunmin.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
