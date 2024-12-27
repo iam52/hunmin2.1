@@ -1,5 +1,6 @@
 package com.hunmin.domain.entity;
 
+import com.hunmin.domain.dto.member.MemberDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
@@ -14,6 +15,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+// 자주 검색되는 항목 인덱싱
 @Table(indexes = {
         @Index(name = "idx_member_email", columnList = "email", unique = true),
         @Index(name = "idx_member_nickname", columnList = "nickname", unique = true)
@@ -59,6 +61,30 @@ public class Member extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bookmark> bookmarks = new ArrayList<>();
+
+    public MemberDTO toDTO() {
+        return new MemberDTO(this);
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateCountry(String country) {
+        this.country = country;
+    }
+
+    public void updateLevel(MemberLevel level) {
+        this.level = level;
+    }
+
+    public void updateImage(String image) {
+        this.image = image;
+    }
 
     public void addFollower(Follow follower) {
         followers.add(follower);

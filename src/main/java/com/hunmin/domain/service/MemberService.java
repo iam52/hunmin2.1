@@ -6,8 +6,8 @@ import com.hunmin.domain.dto.member.PasswordUpdateRequestDto;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.MemberLevel;
 import com.hunmin.domain.entity.MemberRole;
-import com.hunmin.domain.jwt.JWTUtil;
 import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -30,7 +30,6 @@ import java.util.UUID;
 @Log4j2
 @Transactional
 public class MemberService {
-
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -38,14 +37,11 @@ public class MemberService {
     public void registerProcess(MemberDTO memberDTO) {
         String email = memberDTO.getEmail();
         String password = memberDTO.getPassword();
-
         boolean isExist = memberRepository.existsByEmail(email);
         if (isExist) {
             throw new RuntimeException("이미 존재하는 이메일입니다.");
         }
-
         MemberLevel selectedLevel = memberDTO.getLevel() != null ? memberDTO.getLevel() : MemberLevel.BEGINNER;
-
         Member member = Member.builder()
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
@@ -55,67 +51,57 @@ public class MemberService {
                 .level(selectedLevel)
                 .image(memberDTO.getImage())
                 .build();
-
         memberRepository.save(member);
     }
+
     // 회원 정보 업데이트
     public void updateMember(Long id, MemberDTO memberDTO) {
         Optional<Member> optionalMember = memberRepository.findById(id);
-
         if (optionalMember.isPresent()) {
             Member member = optionalMember.get();
-
             if (memberDTO.getPassword() != null && !memberDTO.getPassword().isEmpty()) {
-                member.setPassword(bCryptPasswordEncoder.encode(memberDTO.getPassword()));
+                member.updatePassword(bCryptPasswordEncoder.encode(memberDTO.getPassword()));
             }
             if (memberDTO.getNickname() != null) {
-                member.setNickname(memberDTO.getNickname());
+                member.updateNickname(memberDTO.getNickname());
             }
             if (memberDTO.getCountry() != null) {
-                member.setCountry(memberDTO.getCountry());
+                member.updateCountry(memberDTO.getCountry());
             }
             if (memberDTO.getLevel() != null) {
-                member.setLevel(memberDTO.getLevel());
+                member.updateLevel(memberDTO.getLevel());
             }
-
-            if(memberDTO.getImage() != null) {
-                member.setImage(memberDTO.getImage());
+            if (memberDTO.getImage() != null) {
+                member.updateImage(memberDTO.getImage());
             }
-
             memberRepository.save(member);
         } else {
             throw new RuntimeException("회원 정보를 찾을 수 없습니다.");
         }
     }
+
     public MemberDTO readUserInfo(String email) {
-        return new MemberDTO(memberRepository.findByEmail(email));
+        Member member = memberRepository.findByEmail(email).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        return member.toDTO();
     }
 
     // 비밀번호 재설정을 위한 사용자 검증
-
     public ResponseEntity<?> verifyUserForPasswordReset(PasswordFindRequestDto passwordFindRequestDto) {
-        boolean userExists = memberRepository.existsByEmailAndNickname(
-                passwordFindRequestDto.getEmail(), passwordFindRequestDto.getNickname());
-
-        if (userExists) {
-            return ResponseEntity.ok("사용자 확인 완료");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다.");
-        }
+        return memberRepository.findByEmailAndNickname(
+                        passwordFindRequestDto.getEmail(), passwordFindRequestDto.getNickname())
+                .map(m -> ResponseEntity.ok("사용자 확인 완료"))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다."));
     }
-    // 비밀번호 재설정
 
+    // 비밀번호 재설정
     public ResponseEntity<?> updatePassword(PasswordUpdateRequestDto passwordUpdateRequestDto) {
         try {
-            Member member = memberRepository.findUserByEmailAndNickname(
+            Member member = memberRepository.findByEmailAndNickname(
                             passwordUpdateRequestDto.getEmail(), passwordUpdateRequestDto.getNickname())
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
             String encodedPassword = bCryptPasswordEncoder.encode(passwordUpdateRequestDto.getNewPassword());
-
-            member.setPassword(encodedPassword);
+            member.updatePassword(encodedPassword);
             memberRepository.save(member);
-
             return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

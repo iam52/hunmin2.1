@@ -12,6 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +55,7 @@ public class NoticeService {
 
         //관리자 아닐경우 예외 발생
         if (!member.getMemberRole().equals(MemberRole.ADMIN)) {
-            throw ErrorCode.MEMBER_INVALID.throwException();
+            throw new AccessDeniedException("공지사항 접근 권한이 없습니다.");
         }
             try {
                 Notice notice = noticeRequestDTO.toEntity(member);
@@ -72,7 +73,7 @@ public class NoticeService {
         Member member = getMember(username);
         //관리자 아닐경우 예외 발생
         if (!member.getMemberRole().equals(MemberRole.ADMIN)) {
-            throw ErrorCode.MEMBER_INVALID.throwException();
+            throw new AccessDeniedException("공지사항 접근 권한이 없습니다.");
         }
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(ErrorCode.NOTICE_NOT_FOUND::throwException);
 
@@ -94,7 +95,7 @@ public class NoticeService {
         Member member = getMember(username);
         //관리자 아닐경우 예외 발생
         if (!member.getMemberRole().equals(MemberRole.ADMIN)) {
-            throw ErrorCode.MEMBER_INVALID.throwException();
+            throw new AccessDeniedException("공지사항 접근 권한이 없습니다.");
         }
         noticeRepository.findById(noticeId).orElseThrow(ErrorCode.NOTICE_NOT_FOUND::throwException);
         try {
