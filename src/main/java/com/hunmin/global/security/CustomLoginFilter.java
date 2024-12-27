@@ -1,11 +1,11 @@
 package com.hunmin.domain.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hunmin.domain.dto.member.CustomUserDetails;
 import com.hunmin.domain.entity.MemberLevel;
 import com.hunmin.domain.entity.MemberRole;
 import com.hunmin.domain.entity.RefreshEntity;
 import com.hunmin.domain.repository.RefreshRepository;
+import com.hunmin.global.security.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

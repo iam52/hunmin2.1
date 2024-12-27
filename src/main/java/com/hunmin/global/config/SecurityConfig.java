@@ -1,4 +1,4 @@
-package com.hunmin.domain.config;
+package com.hunmin.global.security;
 
 import com.hunmin.domain.jwt.CustomLogoutFilter;
 import com.hunmin.domain.jwt.JWTFilter;

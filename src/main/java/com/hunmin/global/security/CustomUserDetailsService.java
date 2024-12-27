@@ -1,6 +1,5 @@
-package com.hunmin.domain.service;
+package com.hunmin.domain.jwt;
 
-import com.hunmin.domain.dto.member.CustomUserDetails;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.repository.MemberRepository;
 import org.springframework.security.core.userdetails.UserDetails;
