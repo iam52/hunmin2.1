@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,9 +50,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return Objects.nonNull(value) && value.length > 0 && value[0].contentEquals("true");
     }
 
-    // ErrorCode 예외 처리
-    @ExceptionHandler(RestApiException.class)
-    public ResponseEntity<Object> handleRestApiException(RestApiException exception, WebRequest request) {
+    // ErrorCode 예외 custom 처리
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<Object> handleRestApiException(CustomException exception, WebRequest request) {
         log.error("=== Exception 발생: ", exception);
         return buildErrorResponse(exception, exception.getMessage(), exception.getErrorCode().getStatus(), request);
     }

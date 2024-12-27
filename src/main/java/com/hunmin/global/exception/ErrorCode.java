@@ -103,8 +103,8 @@ public enum ErrorCode {
         this.status = status;
     }
 
-    public RestApiException throwException() {
-        return new RestApiException(this);
+    public CustomException throwException() {
+        return new CustomException(this);
     }
 
     public String getMessage() {
