@@ -7,7 +7,7 @@ import com.hunmin.domain.entity.MemberRole;
 import com.hunmin.domain.entity.Notice;
 import com.hunmin.domain.repository.MemberRepository;
 import com.hunmin.domain.repository.NoticeRepository;
-import com.hunmin.global.exception.CustomException;
+import com.hunmin.global.exception.RestApiException;
 import com.hunmin.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,9 +130,9 @@ class NoticeServiceTest {
         noticeRequestDTO.setTitle("공지제목");
         noticeRequestDTO.setContent("공지내용");
 
-        assertThatThrownBy(() -> noticeService.createNotice(noticeRequestDTO,userEmail))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.MEMBER_INVALID.throwException().getMessage());
+        assertThatThrownBy(() -> noticeService.createNotice(noticeRequestDTO, userEmail))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("접근 거부");
     }
 
     @Test
@@ -169,8 +170,8 @@ class NoticeServiceTest {
         noticeUpdateDTO.setContent("내용수정");
 
         assertThatThrownBy(() -> noticeService.updateNotice(noticeUpdateDTO, userEmail, noticeId))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.MEMBER_INVALID.throwException().getMessage());
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("접근 거부");
     }
 
     @Test
@@ -184,8 +185,8 @@ class NoticeServiceTest {
         //when
         noticeService.deleteNotice(findNoticeId,findAdmin);
         assertThatThrownBy(() -> noticeService.deleteNotice(findNoticeId,findUser))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.MEMBER_INVALID.throwException().getMessage());
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("접근 거부");
         //then
         assertThat(noticeRepository.findById(findNotice.getNoticeId())).isEmpty();
     }
