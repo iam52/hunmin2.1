@@ -26,7 +26,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     public static final String TRACE = "trace";
 
-    @Value("${error.printStackTrace")
+    @Value("${error.printStackTrace}")
     private boolean printStackTrace;
 
     @Override
