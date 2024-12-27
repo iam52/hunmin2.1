@@ -1,4 +1,4 @@
-package com.hunmin.domain.config;
+package com.hunmin.global.config;
 
 import com.hunmin.domain.handler.StompHandler;
 import lombok.RequiredArgsConstructor;

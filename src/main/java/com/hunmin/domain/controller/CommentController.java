@@ -46,7 +46,7 @@ public class CommentController {
     public ResponseEntity<CommentResponseDTO> updateComment(@PathVariable Long boardId, @PathVariable Long commentId,
                                                             @RequestBody CommentRequestDTO commentRequestDTO, Authentication authentication) {
 
-        Long id = memberRepository.findByEmail(authentication.getName()).get().getMemberId();
+        Long id = memberRepository.findByEmail(authentication.getName()).getMemberId();
 
         if(!id.equals(commentRequestDTO.getMemberId())) {
             throw ErrorCode.COMMENT_UPDATE_FAIL.throwException();
@@ -60,7 +60,7 @@ public class CommentController {
     @Operation(summary = "댓글 삭제", description = "댓글을 삭제할 때 사용하는 API")
     public ResponseEntity<Map<String, String>> deleteComment(@PathVariable Long boardId, @PathVariable Long commentId,
                                                              Authentication authentication) {
-        Long id = memberRepository.findByEmail(authentication.getName()).get().getMemberId();
+        Long id = memberRepository.findByEmail(authentication.getName()).getMemberId();
 
         if(!id.equals(commentRepository.findById(commentId).get().getMember().getMemberId())) {
             throw ErrorCode.COMMENT_DELETE_FAIL.throwException();

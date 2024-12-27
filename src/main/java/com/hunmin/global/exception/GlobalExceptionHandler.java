@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,7 +25,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     public static final String TRACE = "trace";
 
-    @Value("${error.printStackTrace")
+    @Value("${error.printStackTrace}")
     private boolean printStackTrace;
 
     @Override
@@ -51,9 +50,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return Objects.nonNull(value) && value.length > 0 && value[0].contentEquals("true");
     }
 
-    // ErrorCode 예외 처리
-    @ExceptionHandler(RestApiException.class)
-    public ResponseEntity<Object> handleRestApiException(RestApiException exception, WebRequest request) {
+    // ErrorCode 예외 custom 처리
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<Object> handleRestApiException(CustomException exception, WebRequest request) {
         log.error("=== Exception 발생: ", exception);
         return buildErrorResponse(exception, exception.getMessage(), exception.getErrorCode().getStatus(), request);
     }
@@ -67,37 +66,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildErrorResponse(exception, exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
-    // 403 에러 예외 처리
-    @ExceptionHandler(AccessDeniedException.class)
-    @Hidden
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException exception, WebRequest request) {
-        log.error("=== 접근 거부: ", exception);
-        return buildErrorResponse(exception, exception.getMessage(), HttpStatus.FORBIDDEN, request);
-    }
-
-    // 409 에러 예외 처리
-    @ExceptionHandler(AlreadyExistElementException.class)
-    @Hidden
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<Object> handleAlreadyExistElementException(AlreadyExistElementException exception, WebRequest request) {
-        log.error("이미 존재하는 데이터입니다.", exception);
-        return buildErrorResponse(exception, exception.getMessage(), HttpStatus.CONFLICT, request);
-    }
-
     // 412 에러 예외 처리
     @Override
     @Hidden
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode status,
+                                                                  WebRequest request
     ) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.UNPROCESSABLE_ENTITY.value(), "입력하신 정보가 올바르지 않습니다.", LocalDateTime.now()
+        ErrorResponse errorResponseDto = new ErrorResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(), "입력값 검증에 실패했습니다.", LocalDateTime.now()
         );
         for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
-            errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
+            errorResponseDto.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
         }
-        return ResponseEntity.unprocessableEntity().body(errorResponse);
+        return ResponseEntity.unprocessableEntity().body(errorResponseDto);
     }
 }

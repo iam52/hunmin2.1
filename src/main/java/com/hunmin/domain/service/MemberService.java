@@ -1,12 +1,14 @@
 package com.hunmin.domain.service;
 
-import com.hunmin.domain.dto.member.MemberDTO;
+import com.hunmin.domain.dto.member.MemberRequest;
+import com.hunmin.domain.dto.member.MemberResponse;
 import com.hunmin.domain.dto.member.PasswordFindRequestDto;
 import com.hunmin.domain.dto.member.PasswordUpdateRequestDto;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.MemberLevel;
 import com.hunmin.domain.entity.MemberRole;
 import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.global.exception.CustomException;
 import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -34,55 +36,51 @@ public class MemberService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     // 회원 가입
-    public void registerProcess(MemberDTO memberDTO) {
-        String email = memberDTO.getEmail();
-        String password = memberDTO.getPassword();
-        boolean isExist = memberRepository.existsByEmail(email);
-        if (isExist) {
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
+    public MemberResponse register(MemberRequest memberRequest) {
+        String email = memberRequest.getEmail();
+        String password = memberRequest.getPassword();
+        boolean isEmailRegistered = memberRepository.existsByEmail(email);
+        if (isEmailRegistered) {
+            throw ErrorCode.MEMBER_ALREADY_EXIST.throwException();
         }
-        MemberLevel selectedLevel = memberDTO.getLevel() != null ? memberDTO.getLevel() : MemberLevel.BEGINNER;
+        MemberLevel memberLevel = memberRequest.getLevel() != null ? memberRequest.getLevel() : MemberLevel.BEGINNER;
         Member member = Member.builder()
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
-                .nickname(memberDTO.getNickname())
-                .country(memberDTO.getCountry())
+                .nickname(memberRequest.getNickname())
+                .country(memberRequest.getCountry())
                 .memberRole(MemberRole.USER)
-                .level(selectedLevel)
-                .image(memberDTO.getImage())
+                .level(memberLevel)
+                .image(memberRequest.getImage())
                 .build();
-        memberRepository.save(member);
+        Member savedMember = memberRepository.save(member);
+        return MemberResponse.from(savedMember);
     }
 
     // 회원 정보 업데이트
-    public void updateMember(Long id, MemberDTO memberDTO) {
+    public void updateMember(Long id, MemberRequest memberRequest) {
         Optional<Member> optionalMember = memberRepository.findById(id);
         if (optionalMember.isPresent()) {
             Member member = optionalMember.get();
-            if (memberDTO.getPassword() != null && !memberDTO.getPassword().isEmpty()) {
-                member.updatePassword(bCryptPasswordEncoder.encode(memberDTO.getPassword()));
+            if (memberRequest.getPassword() != null && !memberRequest.getPassword().isEmpty()) {
+                member.updatePassword(bCryptPasswordEncoder.encode(memberRequest.getPassword()));
             }
-            if (memberDTO.getNickname() != null) {
-                member.updateNickname(memberDTO.getNickname());
+            if (memberRequest.getNickname() != null) {
+                member.updateNickname(memberRequest.getNickname());
             }
-            if (memberDTO.getCountry() != null) {
-                member.updateCountry(memberDTO.getCountry());
+            if (memberRequest.getCountry() != null) {
+                member.updateCountry(memberRequest.getCountry());
             }
-            if (memberDTO.getLevel() != null) {
-                member.updateLevel(memberDTO.getLevel());
+            if (memberRequest.getLevel() != null) {
+                member.updateLevel(memberRequest.getLevel());
             }
-            if (memberDTO.getImage() != null) {
-                member.updateImage(memberDTO.getImage());
+            if (memberRequest.getImage() != null) {
+                member.updateImage(memberRequest.getImage());
             }
             memberRepository.save(member);
         } else {
             throw new RuntimeException("회원 정보를 찾을 수 없습니다.");
         }
-    }
-
-    public MemberDTO readUserInfo(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
-        return member.toDTO();
     }
 
     // 비밀번호 재설정을 위한 사용자 검증
@@ -132,5 +130,13 @@ public class MemberService {
             throw new IllegalArgumentException("Invalid file name: " + fileName);
         }
         return fileName.substring(fileName.lastIndexOf('.') + 1);
+    }
+
+    public MemberRequest readUserInfo(String email) {
+        Member member = memberRepository.findByEmail(email);
+        if (member == null) {
+            throw new CustomException((ErrorCode.MEMBER_NOT_FOUND));
+        }
+        return new MemberRequest(member);
     }
 }

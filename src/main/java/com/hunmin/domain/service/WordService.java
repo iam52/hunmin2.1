@@ -27,18 +27,18 @@ public class WordService {
     private final WordRepository wordRepository;
     private final MemberRepository memberRepository;
     private Member getMember(String username) {
-        Optional<Member> member = memberRepository.findByEmail(username);
-        if (member.isEmpty()) {
+        Member member = memberRepository.findByEmail(username);
+        if (member == null) {
             throw ErrorCode.MEMBER_NOT_FOUND.throwException();
         }
-        return member.orElse(null);
+        return member;
     }
 
     // 단어 등록
     public WordResponseDTO createWord(WordRequestDTO wordRequestDTO, String username) {
         Member member = getMember(username);
         if (!member.getMemberRole().equals(MemberRole.ADMIN)){
-            throw ErrorCode.MEMBER_INVALID.throwException();
+            throw ErrorCode.MEMBER_INVALID_INPUT.throwException();
         }
         try {
             Word word = wordRequestDTO.toEntity(member);
@@ -54,7 +54,7 @@ public class WordService {
     public WordResponseDTO updateWord(WordRequestDTO wordRequestDTO, String title, String lang, String username) {
         Member member = getMember(username);
         if (!member.getMemberRole().equals(MemberRole.ADMIN)) {
-            throw ErrorCode.MEMBER_INVALID.throwException();
+            throw ErrorCode.MEMBER_INVALID_INPUT.throwException();
         }
         // title과 lang 조합으로 단어 조회
         Word word = wordRepository.findByTitleAndLang(title, lang).orElseThrow(ErrorCode.WORD_NOT_FOUND::throwException);
@@ -78,7 +78,7 @@ public class WordService {
         Member member = getMember(username);
         // 관리자가 아닐경우 예외 발생
         if (!member.getMemberRole().equals(MemberRole.ADMIN)) {
-            throw ErrorCode.MEMBER_INVALID.throwException();
+            throw ErrorCode.MEMBER_INVALID_INPUT.throwException();
         }
         // title과 lang 조합으로 단어 조회
         Word word = wordRepository.findByTitleAndLang(title, lang).orElseThrow(ErrorCode.WORD_NOT_FOUND::throwException);

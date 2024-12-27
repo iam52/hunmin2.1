@@ -8,7 +8,6 @@ import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.repository.BookmarkRepository;
 import com.hunmin.domain.repository.BoardRepository;
 import com.hunmin.domain.repository.MemberRepository;
-import com.hunmin.global.exception.AlreadyExistElementException;
 import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,7 @@ public class BookmarkService {
         Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
         bookmarkRepository.findByMemberAndBoard(member, board)
                 .ifPresent(bookmark -> {
-                    throw new AlreadyExistElementException("북마크가 이미 존재합니다.");
+                    throw ErrorCode.BOOKMARK_ALREADY_EXIST.throwException();
                 });
         Bookmark savedBookmark = bookmarkRepository.save(
                 Bookmark.builder()

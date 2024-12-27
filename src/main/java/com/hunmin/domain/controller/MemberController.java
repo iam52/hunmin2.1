@@ -1,6 +1,7 @@
 package com.hunmin.domain.controller;
 
-import com.hunmin.domain.dto.member.MemberDTO;
+import com.hunmin.domain.dto.member.MemberRequest;
+import com.hunmin.domain.dto.member.MemberResponse;
 import com.hunmin.domain.dto.member.PasswordFindRequestDto;
 import com.hunmin.domain.dto.member.PasswordUpdateRequestDto;
 import com.hunmin.domain.entity.MemberRole;
@@ -8,13 +9,15 @@ import com.hunmin.domain.entity.RefreshEntity;
 import com.hunmin.domain.jwt.JWTUtil;
 import com.hunmin.domain.repository.RefreshRepository;
 import com.hunmin.domain.service.MemberService;
+import com.hunmin.global.global.ApiResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.log4j.Log4j2;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 
-// 회원 가입, 회원 정보 수정 컨트롤러 구현
 @RestController
 @RequestMapping("/api/members")
-@Log4j2
+@Slf4j
 @Tag(name = "회원", description = "회원 CRUD")
 public class MemberController {
 
@@ -33,12 +35,26 @@ public class MemberController {
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
 
+    // 생성자 주입
     public MemberController(MemberService memberService, JWTUtil jwtUtil, RefreshRepository refreshRepository) {
         this.memberService = memberService;
         this.jwtUtil = jwtUtil;
         this.refreshRepository = refreshRepository;
     }
 
+    @PostMapping
+    @Operation(summary = "회원 가입", description = "회원 가입할 때 사용하는 API")
+    public ResponseEntity<ApiResponse<MemberResponse>> createMember(@Valid @RequestBody MemberRequest memberRequest) {
+        MemberResponse response = memberService.register(memberRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(201, "회원 가입 완료", response));
+    }
+
+    @PutMapping("/{memberId}")
+    @Operation(summary = "회원 정보 수정", description = "등록된 회원의 정보를 수정할 때 사용하는 API")
+    public ResponseEntity<?> updateMember(@PathVariable Long memberId, @RequestBody MemberRequest memberRequest) {
+        memberService.updateMember(memberId, memberRequest);
+        return ResponseEntity.ok().build();
+    }
 
     @PostMapping("/uploads")
     @Operation(summary = "프로필 사진 등록", description = "회원 가입 시 프로필 사진을 등록할 때 사용하는 API")
@@ -49,24 +65,6 @@ public class MemberController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 업로드 실패");
         }
-    }
-
-    @PostMapping("/register")
-    @Operation(summary = "회원 가입", description = "회원 가입할 때 사용하는 API")
-    public ResponseEntity<String> registerProcess(@RequestBody MemberDTO memberDTO) {
-        try {
-            memberService.registerProcess(memberDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body("회원 가입 완료");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 가입 실패");
-        }
-    }
-
-    @PutMapping("/{memberId}")
-    @Operation(summary = "회원 정보 수정", description = "등록된 회원의 정보를 수정할 때 사용하는 API")
-    public ResponseEntity<?> updateMember(@PathVariable Long memberId, @RequestBody MemberDTO memberDTO) {
-        memberService.updateMember(memberId, memberDTO);
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/reissue")

@@ -7,6 +7,7 @@ import com.hunmin.domain.entity.Notification;
 import com.hunmin.domain.handler.SseEmitters;
 import com.hunmin.domain.repository.MemberRepository;
 import com.hunmin.domain.repository.NotificationRepository;
+import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class NotificationService {
 
     private static final long TIMEOUT = 5 * 60 * 1000L;
 
-    //클라이언트의 연결 구독
+    // 클라이언트의 연결 구독
     public SseEmitter subscribe(Long memberId) {
         String existingId = memberId + "_";
         Map<String, SseEmitter> existingEmitters = sseEmitters.findEmitter(existingId);
@@ -68,7 +69,7 @@ public class NotificationService {
         return emitter;
     }
 
-    //클라이언트에 데이터 전송
+    // 클라이언트에 데이터 전송
     private void sendToClient(SseEmitter emitter, String sseId, Object data) {
         try {
             emitter.send(SseEmitter.event()
@@ -77,15 +78,16 @@ public class NotificationService {
         } catch (IOException exception) {
             log.error("Error sending data to client: {}", exception.getMessage());
             sseEmitters.delete(sseId);
-            throw NotificationException.NOT_SEND.get();
+            throw ErrorCode.NOTIFICATION_SEND_FAIL.throwException();
         }
     }
 
-    //알림 전송
+    // 알림 전송
     @Transactional
     public void send(NotificationSendDTO notificationSendDTO) {
         try {
-            Member member = memberRepository.findById(notificationSendDTO.getMemberId()).orElseThrow(MemberException.NOT_FOUND::get);
+            Member member = memberRepository.findById(notificationSendDTO.getMemberId())
+                    .orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
             log.info("member123123{}",member);
 
             Notification notification = Notification.builder()
@@ -107,25 +109,26 @@ public class NotificationService {
                 sendToClient(emitter, memberId, notificationResponseDTO);
             });
         } catch (Exception e) {
-            throw NotificationException.NOT_SEND.get();
+            throw ErrorCode.NOTIFICATION_SEND_FAIL.throwException();
         }
     }
 
-    //회원 별 알림 조회
+    // 회원 별 알림 조회
     public List<Notification> ReadNotificationByMember(Long memberId) {
         return notificationRepository.findByMemberId(memberId);
     }
 
-    //알림 읽음 처리
+    // 알림 읽음 처리
     @Transactional
     public NotificationResponseDTO updateNotification(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId).orElseThrow(NotificationException.NOT_FOUND::get);
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(ErrorCode.NOTIFICATION_NOT_FOUND::throwException);
         try {
             notification.changeIsRead(true);
 
             return new NotificationResponseDTO(notification);
         } catch (Exception e) {
-            throw NotificationException.NOT_UPDATED.get();
+            throw ErrorCode.NOTIFICATION_UPDATE_FAIL.throwException();
         }
     }
 }

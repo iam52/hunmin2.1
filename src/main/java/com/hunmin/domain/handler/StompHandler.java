@@ -1,10 +1,11 @@
 package com.hunmin.domain.handler;
 
 import com.hunmin.domain.dto.chat.ChatMessageDTO;
-import com.hunmin.domain.dto.member.CustomUserDetails;
+import com.hunmin.global.security.CustomUserDetails;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.jwt.JWTUtil;
 import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.Message;
@@ -36,7 +37,7 @@ public class StompHandler implements ChannelInterceptor {
             if (jwtUtil.isExpired(jwtToken)){
                 String role = jwtUtil.getRole(jwtToken);
                 ChatMessageDTO chatMessageDTO=(ChatMessageDTO)message.getPayload();
-                Member foundMember = memberRepository.findById(chatMessageDTO.getMemberId()).orElseThrow(MemberException.NOT_FOUND::get);
+                Member foundMember = memberRepository.findById(chatMessageDTO.getMemberId()).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
                 CustomUserDetails customUserDetails = new CustomUserDetails(foundMember);
 
                 Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null,

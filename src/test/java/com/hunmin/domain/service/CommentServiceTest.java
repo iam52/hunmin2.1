@@ -47,8 +47,20 @@ public class CommentServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        member = new Member(1L, "테스터");
-        board = new Board(1L, member, "테스트 제목", "테스트 내용");
+        Member member = Member.builder()
+                .email("test@example.com")
+                .password("password123")
+                .nickname("testuser")
+                .country("Korea")
+                .build();
+        Board board = Board.builder()
+                .member(member)
+                .title("게시글 제목")
+                .content("게시글 내용")
+                .location("서울")
+                .latitude(37.5665)
+                .longitude(126.9780)
+                .build();
         comment = new Comment(1L, member, board, "테스트 댓글");
     }
 

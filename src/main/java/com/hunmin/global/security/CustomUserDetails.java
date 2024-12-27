@@ -1,4 +1,4 @@
-package com.hunmin.domain.dto.member;
+package com.hunmin.global.security;
 
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.MemberLevel;

@@ -7,8 +7,6 @@ import com.hunmin.domain.entity.MemberRole;
 import com.hunmin.domain.entity.Notice;
 import com.hunmin.domain.repository.MemberRepository;
 import com.hunmin.domain.repository.NoticeRepository;
-import com.hunmin.global.exception.RestApiException;
-import com.hunmin.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

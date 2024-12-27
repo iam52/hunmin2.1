@@ -7,6 +7,7 @@ import com.hunmin.domain.handler.SseEmitters;
 import com.hunmin.domain.repository.CommentRepository;
 import com.hunmin.domain.repository.LikeCommentRepository;
 import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -32,14 +33,14 @@ public class LikeCommentService {
     //좋아요 등록
     @Transactional
     public void createLikeComment(Long memberId, Long commentId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NOT_FOUND::get);
-        Comment comment = commentRepository.findById(commentId).orElseThrow(CommentException.NOT_FOUND::get);
+        Member member = memberRepository.findById(memberId).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        Comment comment = commentRepository.findById(commentId).orElseThrow(ErrorCode.COMMENT_NOT_FOUND::throwException);
         Long commentMemberId = comment.getMember().getMemberId();
         Board board = comment.getBoard();
 
         likeCommentRepository.findByMemberAndComment(member, comment).ifPresentOrElse(
                 likeComment -> {
-                    throw LikeCommentException.NOT_CREATED.get();
+                    throw ErrorCode.LIKE_CREATE_FAIL.throwException();
                 },
                 () -> {
                     likeCommentRepository.save(LikeComment.builder().member(member).comment(comment).build());
@@ -73,22 +74,23 @@ public class LikeCommentService {
     //좋아요 삭제
     @Transactional
     public void deleteLikeComment(Long memberId, Long commentId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NOT_FOUND::get);
-        Comment comment = commentRepository.findById(commentId).orElseThrow(CommentException.NOT_FOUND::get);
-        LikeComment likeComment = likeCommentRepository.findByMemberAndComment(member, comment).orElseThrow(LikeCommentException.NOT_FOUND::get);
+        Member member = memberRepository.findById(memberId).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        Comment comment = commentRepository.findById(commentId).orElseThrow(ErrorCode.COMMENT_NOT_FOUND::throwException);
+        LikeComment likeComment = likeCommentRepository.findByMemberAndComment(member, comment)
+                .orElseThrow(ErrorCode.LIKE_NOT_FOUND::throwException);
 
         try {
             likeCommentRepository.delete(likeComment);
             comment.decrementLikeCount();
         } catch (Exception e) {
-            throw LikeCommentException.NOT_DELETED.get();
+            throw ErrorCode.LIKE_DELETE_FAIL.throwException();
         }
     }
 
     //좋아요 여부 확인
     public boolean isLikeComment(Long memberId, Long commentId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberException.NOT_FOUND::get);
-        Comment comment = commentRepository.findById(commentId).orElseThrow(CommentException.NOT_FOUND::get);
+        Member member = memberRepository.findById(memberId).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        Comment comment = commentRepository.findById(commentId).orElseThrow(ErrorCode.COMMENT_NOT_FOUND::throwException);
 
         return likeCommentRepository.existsByMemberAndComment(member, comment);
     }

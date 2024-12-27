@@ -10,6 +10,7 @@ import com.hunmin.domain.entity.NotificationType;
 import com.hunmin.domain.handler.SseEmitters;
 import com.hunmin.domain.repository.FollowRepository;
 import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -35,17 +36,17 @@ public class FollowService {
     // 팔로워 등록
     public FollowRequestDTO register(String myEmail, Long memberId) {
         try {
-            Member followee = memberRepository.findById(memberId).orElseThrow(MemberException.NOT_FOUND::get);
+            Member followee = memberRepository.findById(memberId).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
             Member owner = memberRepository.findByEmail(myEmail);
 
             if (followee.getMemberId().equals(owner.getMemberId())) {
-                throw FollowException.IMPOSSIBLE_FOLLOW.get();
+                throw ErrorCode.FOLLOW_CREATE_FAIL.throwException();
             }
 
             // 중복체크
             Optional<Follow> foundMember = followRepository.findByMemberId(owner.getMemberId(), memberId);
             if (foundMember.isPresent()) {
-                throw FollowException.DUPLICATED_FOLLOW.get();
+                throw ErrorCode.FOLLOW_ALREADY_EXIST.throwException();
             }
 
             Follow follow = Follow.builder()
@@ -94,13 +95,13 @@ public class FollowService {
     // 팔로이 수락
     public FollowRequestDTO registerAccept(String myEmail, Long memberId) {
         try {
-            Member followee = memberRepository.findById(memberId).orElseThrow(MemberException.NOT_FOUND::get);
+            Member followee = memberRepository.findById(memberId).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
             Member owner = memberRepository.findByEmail(myEmail);
 
             // 중복체크
             Optional<Follow> foundMember = followRepository.findByMemberId(owner.getMemberId(),memberId);
             if (foundMember.isPresent()) {
-                throw FollowException.DUPLICATED_FOLLOW.get();
+                throw ErrorCode.FOLLOW_ALREADY_EXIST.throwException();
             }
 
             Follow follow = Follow.builder()
@@ -127,7 +128,7 @@ public class FollowService {
         try {
             Member owner = memberRepository.findByEmail(myEmail);
             Follow foundMember = followRepository.findByMemberId(owner.getMemberId(), memberId)
-                    .orElseThrow(FollowException.NOT_FOUND::get);
+                    .orElseThrow(ErrorCode.FOLLOW_NOT_FOUND::throwException);
 
             followRepository.deleteById(foundMember.getFollowId());
 
@@ -157,7 +158,7 @@ public class FollowService {
         try {
             Member owner = memberRepository.findByEmail(myEmail);
             Follow foundMember = followRepository.findByMemberId(memberId,owner.getMemberId())
-                    .orElseThrow(FollowException.NOT_FOUND::get);
+                    .orElseThrow(ErrorCode.FOLLOW_NOT_FOUND::throwException);
 
             log.info("B owner {}",owner);
             log.info("B memberId {}",memberId);
@@ -177,7 +178,7 @@ public class FollowService {
         try {
             Member owner = memberRepository.findByEmail(myEmail);
             Follow foundMember = followRepository.findByMemberId(memberId,owner.getMemberId())
-                    .orElseThrow(FollowException.NOT_FOUND::get);
+                    .orElseThrow(ErrorCode.FOLLOW_NOT_FOUND::throwException);
             log.info("A owner {}",owner);
             log.info("A memberId {}",memberId);
             log.info("A foundMember {}",foundMember);

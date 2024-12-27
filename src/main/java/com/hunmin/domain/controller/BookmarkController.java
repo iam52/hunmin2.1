@@ -2,7 +2,8 @@ package com.hunmin.domain.controller;
 
 import com.hunmin.domain.dto.board.BoardResponseDTO;
 import com.hunmin.domain.dto.bookmark.BookmarkResponse;
-import com.hunmin.domain.dto.member.CustomUserDetails;
+import com.hunmin.domain.entity.Member;
+import com.hunmin.global.security.CustomUserDetails;
 import com.hunmin.domain.repository.MemberRepository;
 import com.hunmin.domain.service.BookmarkService;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +35,8 @@ public class BookmarkController {
     //북마크 삭제
     @DeleteMapping("/{boardId}")
     public ResponseEntity<String> deleteBookmark(@PathVariable Long boardId, Authentication authentication) {
-        Long memberId = memberRepository.findByEmail(authentication.getName()).orElseThrow().getMemberId();
-        bookmarkService.deleteBookmark(boardId, memberId);
+        Member member = memberRepository.findByEmail(authentication.getName());
+        bookmarkService.deleteBookmark(boardId, member.getMemberId());
         return ResponseEntity.ok("북마크 삭제");
     }
 

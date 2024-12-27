@@ -8,6 +8,7 @@ import com.hunmin.domain.entity.Board;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.repository.BoardRepository;
 import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.*;
@@ -100,7 +101,8 @@ public class BoardService {
     //게시글 등록
     public BoardResponseDTO createBoard(BoardRequestDTO boardRequestDTO) {
         try {
-            Member member = memberRepository.findById(boardRequestDTO.getMemberId()).orElseThrow(MemberException.NOT_FOUND::get);
+            Member member = memberRepository.findById(boardRequestDTO.getMemberId())
+                    .orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
 
             Board board = Board.builder()
                     .member(member)
@@ -119,7 +121,7 @@ public class BoardService {
             return new BoardResponseDTO(board);
         } catch (Exception e) {
             log.error(e);
-            throw BoardException.NOT_CREATED.get();
+            throw ErrorCode.BOARD_CREATE_FAIL.throwException();
         }
     }
 
@@ -130,7 +132,7 @@ public class BoardService {
             return cachedBoard;
         }
 
-        Board board = boardRepository.findCommentsByBoardId(boardId).orElseThrow(BoardException.NOT_FOUND::get);
+        Board board = boardRepository.findCommentsByBoardId(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
         BoardResponseDTO boardResponseDTO = new BoardResponseDTO(board);
 
         hashOps.put("board", String.valueOf(boardId), boardResponseDTO);
@@ -140,7 +142,7 @@ public class BoardService {
 
     //게시글 수정
     public BoardResponseDTO updateBoard(Long boardId, BoardRequestDTO boardRequestDTO) {
-        Board board = boardRepository.findById(boardId).orElseThrow(BoardException.NOT_FOUND::get);
+        Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
 
         try {
             List<String> existingImageUrls = new ArrayList<>(board.getImageUrls());
@@ -177,13 +179,13 @@ public class BoardService {
             return new BoardResponseDTO(board);
         } catch (Exception e) {
             log.error(e);
-            throw BoardException.NOT_UPDATED.get();
+            throw ErrorCode.BOARD_UPDATE_FAIL.throwException();
         }
     }
 
     //게시글 삭제
     public BoardResponseDTO deleteBoard(Long boardId) {
-        Board board = boardRepository.findById(boardId).orElseThrow(BoardException.NOT_FOUND::get);
+        Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
 
         try {
             for (String imageUrl : board.getImageUrls()) {
@@ -196,7 +198,7 @@ public class BoardService {
             return new BoardResponseDTO(board);
         } catch (Exception e) {
             log.error(e);
-            throw BoardException.NOT_DELETED.get();
+            throw ErrorCode.BOARD_DELETE_FAIL.throwException();
         }
     }
 
@@ -283,7 +285,7 @@ public class BoardService {
         return boardRepository.searchBoard(pageable.getPageable(sort), title);
         }catch (Exception e) {
             log.error(e.getMessage());
-            throw BoardException.NOT_FOUND.get();
+            throw ErrorCode.BOARD_NOT_FOUND.throwException();
         }
     }
 }

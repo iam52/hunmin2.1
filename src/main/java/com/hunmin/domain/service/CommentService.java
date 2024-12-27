@@ -12,6 +12,7 @@ import com.hunmin.domain.handler.SseEmitters;
 import com.hunmin.domain.repository.BoardRepository;
 import com.hunmin.domain.repository.CommentRepository;
 import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -37,8 +38,9 @@ public class CommentService {
     // 댓글 등록
     public CommentResponseDTO createComment(Long boardId, CommentRequestDTO commentRequestDTO) {
         try {
-            Member member = memberRepository.findById(commentRequestDTO.getMemberId()).orElseThrow(MemberException.NOT_FOUND::get);
-            Board board = boardRepository.findById(boardId).orElseThrow(BoardException.NOT_FOUND::get);
+            Member member = memberRepository.findById(commentRequestDTO.getMemberId())
+                    .orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+            Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
 
             Comment comment = Comment.builder()
                     .member(member)
@@ -77,16 +79,16 @@ public class CommentService {
             return new CommentResponseDTO(comment);
         } catch (Exception e) {
             log.error(e);
-            throw CommentException.NOT_CREATED.get();
+            throw ErrorCode.COMMENT_CREATE_FAIL.throwException();
         }
     }
 
     //대댓글 등록
     public CommentResponseDTO createCommentChild(Long boardId, Long commentId, CommentRequestDTO commentRequestDTO) {
         try {
-            Member member = memberRepository.findById(commentRequestDTO.getMemberId()).orElseThrow(MemberException.NOT_FOUND::get);
-            Board board = boardRepository.findById(boardId).orElseThrow(BoardException.NOT_FOUND::get);
-            Comment parent = commentRepository.findById(commentId).orElseThrow(CommentException.NOT_FOUND::get);
+            Member member = memberRepository.findById(commentRequestDTO.getMemberId()).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+            Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
+            Comment parent = commentRepository.findById(commentId).orElseThrow(ErrorCode.COMMENT_NOT_FOUND::throwException);
 
             Comment children = Comment.builder().member(member).board(board).parent(parent).content(commentRequestDTO.getContent()).likeCount(0).build();
 
@@ -122,13 +124,13 @@ public class CommentService {
             return new CommentResponseDTO(children);
         } catch (Exception e) {
             log.error(e);
-            throw CommentException.NOT_CREATED.get();
+            throw ErrorCode.COMMENT_CREATE_FAIL.throwException();
         }
     }
 
     //댓글 수정
     public CommentResponseDTO updateComment(Long commentId, CommentRequestDTO commentRequestDTO) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(CommentException.NOT_FOUND::get);
+        Comment comment = commentRepository.findById(commentId).orElseThrow(ErrorCode.COMMENT_NOT_FOUND::throwException);
 
         try {
             comment.changeContent(commentRequestDTO.getContent());
@@ -136,13 +138,13 @@ public class CommentService {
             return new CommentResponseDTO(comment);
         } catch (Exception e) {
             log.error(e);
-            throw CommentException.NOT_UPDATED.get();
+            throw ErrorCode.COMMENT_UPDATE_FAIL.throwException();
         }
     }
 
     //댓글 삭제
     public CommentResponseDTO deleteComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(CommentException.NOT_FOUND::get);
+        Comment comment = commentRepository.findById(commentId).orElseThrow(ErrorCode.COMMENT_NOT_FOUND::throwException);
 
         try {
             commentRepository.delete(comment);
@@ -150,7 +152,7 @@ public class CommentService {
             return new CommentResponseDTO(comment);
         } catch (Exception e) {
             log.error(e);
-            throw CommentException.NOT_DELETED.get();
+            throw ErrorCode.COMMENT_DELETE_FAIL.throwException();
         }
     }
 
