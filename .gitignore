@@ -258,3 +258,14 @@ gradle-app.setting
 .env
 logs/
 **/generated/
+
+# IntelliJ IDEA
+.idea/
+
+# Compiled output
+output/
+*.bin
+*.idx
+
+# Test results
+results.bin

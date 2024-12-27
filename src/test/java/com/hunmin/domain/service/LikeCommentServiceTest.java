@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,9 +42,26 @@ class LikeCommentServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        member = new Member(1L, "테스터");
-        member2 = new Member(2L, "테스터2");
-        board = new Board(1L, member, "테스트 제목", "테스트 내용");
+        Member member1 = Member.builder()
+                .email("test1@example.com")
+                .password("password123")
+                .nickname("testuser1")
+                .country("Korea")
+                .build();
+        Member member2 = Member.builder()
+                .email("test2@example.com")
+                .password("password123")
+                .nickname("testuser2")
+                .country("Korea")
+                .build();
+        Board board = Board.builder()
+                .member(member)
+                .title("게시글 제목")
+                .content("게시글 내용")
+                .location("서울")
+                .latitude(37.5665)
+                .longitude(126.9780)
+                .build();
         comment = new Comment(1L, member, board, "테스트 댓글");
         likeComment = new LikeComment(1L, member, comment);
     }
@@ -91,7 +109,7 @@ class LikeCommentServiceTest {
         when(likeCommentRepository.findMembersByLikedCommentId(comment.getCommentId()))
                 .thenReturn(List.of(member, member2));
 
-        List<String> likedMembersNicknames = likeCommentService.getLikeCommentMembers(comment.getCommentId());
+        List<Map<String, String>> likedMembersNicknames = likeCommentService.getLikeCommentMembers(comment.getCommentId());
 
         assertEquals(2, likedMembersNicknames.size());
         assertTrue(likedMembersNicknames.contains("테스터"));

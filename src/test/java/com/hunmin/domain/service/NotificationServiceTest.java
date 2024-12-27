@@ -63,7 +63,12 @@ class NotificationServiceTest {
                 .url("/test/url")
                 .build();
 
-        Member member = new Member(1L, "테스터");
+        Member member = Member.builder()
+                .email("test@example.com")
+                .password("password123")
+                .nickname("testuser")
+                .country("Korea")
+                .build();
 
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
@@ -86,7 +91,12 @@ class NotificationServiceTest {
     void updateNotification() {
         Notification notification = Notification.builder()
                 .notificationId(1L)
-                .member(new Member(1L, "테스터"))
+                .member(Member.builder()
+                        .email("test@example.com")
+                        .password("password123")
+                        .nickname("testuser")
+                        .country("Korea")
+                        .build())
                 .message("Test Message")
                 .notificationType(NotificationType.COMMENT)
                 .url("/test/url")

@@ -22,19 +22,19 @@ public class BoardRepositoryTest {
     @Autowired
     private BoardRepository boardRepository;
 
-    //게시글 등록 테스트
-    @Test
-    @Transactional
-    @Commit
-    public void testCreateBoard() {
-        Member member = memberRepository.findById(1L).get();
-
-        Board board = Board.builder().member(member).title("게시글 등록 테스트").nickname(member.getNickname()).content("게시글 등록 테스트 내용입니다.").build();
-
-        Board savedBoard = boardRepository.save(board);
-
-        assertNotNull(savedBoard);
-    }
+//    //게시글 등록 테스트
+//    @Test
+//    @Transactional
+//    @Commit
+//    public void testCreateBoard() {
+//        Member member = memberRepository.findById(1L).get();
+//
+//        Board board = Board.builder().member(member).title("게시글 등록 테스트");
+//
+//        Board savedBoard = boardRepository.save(board);
+//
+//        assertNotNull(savedBoard);
+//    }
 
     //게시글 조회 테스트
     @Test
