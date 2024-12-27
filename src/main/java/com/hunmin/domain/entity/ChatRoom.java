@@ -25,6 +25,7 @@ public class ChatRoom extends BaseTimeEntity{
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL,orphanRemoval = true, fetch = FetchType.EAGER) // @JoinColumn 제거
     private List<ChatMessage> chatMessage;
 
+    @Builder.Default
     private long userCount=1;
 
     public void add(ChatMessage chatMessage){

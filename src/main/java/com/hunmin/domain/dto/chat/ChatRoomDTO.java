@@ -20,6 +20,8 @@ public class ChatRoomDTO {
     private Long memberId; //nickname = 채팅방 이름(대화상대 닉네임)
     private String nickname;
     private long userCount;
+
+    @Builder.Default
     private List<Long> chatMessageIds = new ArrayList<>();
     private String latestMessageContent;
     private LocalDateTime latestMessageDate;

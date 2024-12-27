@@ -44,6 +44,7 @@ public class Board extends BaseTimeEntity {
 
     private Double longitude;
 
+    @Builder.Default
     @ElementCollection
     @CollectionTable(name = "board_image_urls", joinColumns = @JoinColumn(name = "board_id"))
     @Column(name = "image_urls", columnDefinition = "TEXT", nullable = false)
