@@ -1,102 +1,127 @@
-//package com.hunmin.domain.repository;
-//
-//import com.hunmin.domain.entity.Member;
-//import lombok.extern.log4j.Log4j2;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//
-//import java.util.Optional;
-//import java.util.stream.IntStream;
-//
-//import static com.hunmin.domain.entity.MemberRole.ADMIN;
-//import static com.hunmin.domain.entity.MemberRole.USER;
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//@SpringBootTest
-//@Log4j2
-//class MemberRepositoryTest {
-//
-//    @Autowired
-//    private MemberRepository memberRepository;
-//
-//    @Test
-//    public void testDataInsert() {
-//        IntStream.rangeClosed(1, 10).forEach(i -> {
-//            Member member = Member
-//                    .builder()
-//                    .memberId((long) i)
-//                    .password("1234")
-//                    .email("USER" + i + "@email.com")
-//                    .nickname("USER" + i)
-//                    .country("USER_COUNTRY" + i)
-//                    .level("LEVEL" + i)
-//                    .image("IMAGE" + i)
-//                    .memberRole(i <= 8 ? USER : ADMIN)
-//                    .build();
-//            Member savedMember = memberRepository.save(member);
-//
-//            assertNotNull(savedMember);
-//            if (i <= 8) {
-//                assertEquals(savedMember.getMemberRole(), USER);
-//            } else {
-//                assertEquals(savedMember.getMemberRole(), ADMIN);
-//            }
-//        });
-//        log.info("================ 데이터 삽입 완료 ================ : " + memberRepository.count());
-//    }
-//
-//    @Test
-//    void testFindByEmail() {
-//        String email = "USER1@email.com";
-//
-//        Optional<Member> foundMember = memberRepository.findByEmail(email);
-//
-//        assertTrue(foundMember.isPresent(), "해당 이메일 존재: " + email);
-//        foundMember.ifPresent(member -> {
-//            assertEquals(email, member.getEmail());
-//            log.info("파운드멤버: " + foundMember);
-//            log.info("이메일: " + foundMember.get().getEmail());
-//        });
-//    }
-//
-//    @Test
-//    void testFindByNickname() {
-//        String nickname = "USER1";
-//
-//        Optional<Member> foundMember = memberRepository.findByNickname(nickname);
-//
-//        assertTrue(foundMember.isPresent(), "해당 닉네임 존재: " + nickname);
-//        foundMember.ifPresent(member -> {
-//            assertEquals(nickname, member.getNickname());
-//            log.info("파운드멤버: " + foundMember);
-//            log.info("닉네임: " + member.getNickname());
-//        });
-//    }
-//
-//    @Test
-//    void testExistsByEmail() {
-//        String email = "USER10@email.com";
-//        boolean exists = memberRepository.existsByEmail(email);
-//        assertTrue(exists);
-//        log.info("존재하는 이메일 테스트: " + email);
-//
-//        String notExistEmail = "ADMIN10@email.com";
-//        boolean doesNotExist = memberRepository.existsByEmail(notExistEmail);
-//        assertFalse(doesNotExist);
-//        log.info("존재하지 않는 이메일 테스트: " + notExistEmail);
-//    }
-//
-//    @Test
-//    void testExistsByNickname() {
-//        String nickname = "USER1";
-//        boolean exists = memberRepository.existsByNickname(nickname);
-//        assertTrue(exists);
-//        log.info("존재하는 닉네임 테스트: " + nickname);
-//
-//        String notExistNickname = "not_exist_nickname";
-//        boolean doesNotExist = memberRepository.existsByNickname(notExistNickname);
-//        assertFalse(doesNotExist);
-//        log.info("존재하지 않는 닉네임 테스트: " + notExistNickname);
-//    }
-//}
+package com.hunmin.domain.repository;
+
+import com.hunmin.domain.entity.Member;
+import com.hunmin.domain.entity.MemberLevel;
+import com.hunmin.domain.entity.MemberRole;
+import com.hunmin.global.exception.ErrorCode;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+@Transactional
+@Slf4j
+class MemberRepositoryTest {
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    private Member member1;
+    private Member member2;
+    private Member member3;
+
+    @BeforeEach
+    void setUp() {
+        member1 = memberRepository.save(Member.builder()
+                .email("member1@email.com")
+                .password(bCryptPasswordEncoder.encode("1234"))
+                .build()
+        );
+
+        member2 = memberRepository.save(Member.builder()
+                .email("member2@email.com")
+                .password(bCryptPasswordEncoder.encode("2345"))
+                .nickname("member2")
+                .build()
+        );
+
+        member3 = memberRepository.save(Member.builder()
+                .email("member3@email.com")
+                .password(bCryptPasswordEncoder.encode("3456"))
+                .nickname("member3")
+                .country("South America")
+                .level(MemberLevel.BEGINNER)
+                .memberRole(MemberRole.USER)
+                .image("profile3.png")
+                .build()
+        );
+    }
+
+    @Test
+    @DisplayName("이메일로 조회")
+    void findByEmailTest() {
+        // when
+        Member foundMember = memberRepository.findByEmail(member1.getEmail());
+
+        // then
+        assertNotNull(foundMember);
+        assertEquals(member1.getEmail(), foundMember.getEmail());
+    }
+
+    @Test
+    @DisplayName("닉네임으로 조회")
+    void findByNicknameTest() {
+        // when
+        Member foundMember = memberRepository.findByNickname(member2.getNickname());
+
+        // then
+        assertNotNull(foundMember);
+        assertEquals(member2.getNickname(), foundMember.getNickname());
+    }
+
+    @Test
+    @DisplayName("이메일 중복 검사")
+    void existsByEmailTest() {
+        // when & then
+        assertTrue(memberRepository.existsByEmail(member3.getEmail()));
+        assertFalse(memberRepository.existsByEmail("member4@email.com"));
+    }
+
+    @Test
+    @DisplayName("넥네임 중복 검사")
+    void existsByNicknameTest() {
+        // when & then
+        assertTrue(memberRepository.existsByNickname(member1.getNickname()));
+        assertFalse(memberRepository.existsByNickname("member4"));
+    }
+
+    @Test
+    @DisplayName("이메일과 닉네임으로 조회")
+    void findByEmailAndNicknameTest() {
+        // when
+        Member foundMember = memberRepository.findByEmailAndNickname(member2.getEmail(), member2.getNickname())
+                .orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+
+        // then
+        assertNotNull(foundMember);
+        assertEquals(member2.getEmail(), foundMember.getEmail());
+        assertEquals(member2.getNickname(), foundMember.getNickname());
+    }
+
+    @Test
+    @DisplayName("페이징된 전체 회원 조회")
+    void findAllMembersTest() {
+        // when
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Member> memberPage = memberRepository.findAllMembers(pageable);
+
+        // then
+        assertEquals(3, memberPage.getContent().size());
+        assertEquals(15, memberPage.getTotalElements());
+        assertEquals(5, memberPage.getTotalPages());
+    }
+}

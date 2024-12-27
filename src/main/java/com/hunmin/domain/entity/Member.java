@@ -17,7 +17,6 @@ import java.util.Set;
 // 자주 검색되는 항목 인덱싱
 @Table(indexes = {
         @Index(name = "idx_member_email", columnList = "email", unique = true),
-        @Index(name = "idx_member_nickname", columnList = "nickname", unique = true)
 })
 public class Member extends BaseTimeEntity {
 
@@ -31,14 +30,11 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
     private String nickname;
 
-    @Column(nullable = false)
     private String country;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private MemberLevel level;
 
     @Enumerated(EnumType.STRING)

@@ -2,15 +2,20 @@ package com.hunmin.domain.service;
 
 import com.hunmin.domain.dto.member.MemberRequest;
 import com.hunmin.domain.dto.member.MemberResponse;
+import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.MemberLevel;
+import com.hunmin.domain.entity.MemberRole;
 import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.global.exception.CustomException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -22,22 +27,37 @@ class MemberServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
     @Test
-    void testCreateMember() {
-        // Given
+    @DisplayName("회원 가입 성공")
+    void registerTest() {
         MemberRequest memberRequest = new MemberRequest();
-        memberRequest.setEmail("USER51@email.com");
-        memberRequest.setPassword("1234");
-        memberRequest.setNickname("USER51");
-        memberRequest.setCountry("Thailand");
-        memberRequest.setLevel(MemberLevel.BEGINNER);
-        memberRequest.setImage("profile.png");
+        memberRequest.setEmail("test@test.com");
+        memberRequest.setPassword(bCryptPasswordEncoder.encode("123456"));
 
-        // When
-        MemberResponse response = memberService.register(memberRequest);
+        // when
+        MemberResponse memberResponse = memberService.register(memberRequest);
 
-        // Then
-        assertNotNull(response);
-        assertEquals("USER51@email.com", response.getEmail());
+        // then
+        assertNotNull(memberResponse);
+        assertEquals(memberResponse.getEmail(), memberRequest.getEmail());
+    }
+
+    @Test
+    @DisplayName("중복 이메일 가입 실패")
+    void registerDuplicateEmailTest() {
+        // given
+        MemberRequest memberRequest = new MemberRequest();
+        memberRequest.setEmail("test@test.com");
+        memberRequest.setPassword(bCryptPasswordEncoder.encode("123456"));
+        memberRequest.setNickname("testMan");
+
+        // when
+        memberService.register(memberRequest);
+
+        // then
+        assertThrows(CustomException.class, () -> memberService.register(memberRequest));
     }
 }
