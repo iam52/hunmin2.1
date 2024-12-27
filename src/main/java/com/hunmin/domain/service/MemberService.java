@@ -81,7 +81,7 @@ public class MemberService {
     }
 
     public MemberDTO readUserInfo(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        Member member = memberRepository.findByEmail(email);
         return member.toDTO();
     }
 

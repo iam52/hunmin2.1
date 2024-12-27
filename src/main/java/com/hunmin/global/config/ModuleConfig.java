@@ -1,4 +1,4 @@
-package com.hunmin.domain.config;
+package com.hunmin.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

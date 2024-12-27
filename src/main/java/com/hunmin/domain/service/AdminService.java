@@ -40,7 +40,7 @@ public class AdminService {
 
     //회원 닉네임으로 검색
     public MemberStatusDTO getMemberByNickname(String username) {
-        Member member = memberRepository.findByNickname(username).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        Member member = memberRepository.findByNickname(username);
         int boardCount = boardRepository.countByMemberId(member.getMemberId());
         int commentCount = commentRepository.countByMemberId(member.getMemberId());
         return new MemberStatusDTO(member, boardCount, commentCount);

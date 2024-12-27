@@ -57,15 +57,10 @@ public class NoticeService {
         if (!member.getMemberRole().equals(MemberRole.ADMIN)) {
             throw new AccessDeniedException("공지사항 접근 권한이 없습니다.");
         }
-            try {
-                Notice notice = noticeRequestDTO.toEntity(member);
-                Notice savedNotice = noticeRepository.save(notice);
-                log.info("Notice created successfully. Notice ID: {}", savedNotice.getNoticeId());
-                return new NoticeResponseDTO(savedNotice);
-            }catch (Exception e) {
-                log.error("createNotice error: {}",  e.getMessage());
-                throw ErrorCode.NOTICE_CREATE_FAIL.throwException();
-            }
+        Notice notice = noticeRequestDTO.toEntity(member);
+        Notice savedNotice = noticeRepository.save(notice);
+        log.info("Notice created successfully. Notice ID: {}", savedNotice.getNoticeId());
+        return new NoticeResponseDTO(savedNotice);
     }
 
     //공지사항 수정
@@ -108,10 +103,10 @@ public class NoticeService {
     }
 
     private Member getMember(String username) {
-        Optional<Member> member = memberRepository.findByEmail(username);
-        if (member.isEmpty()) {
+        Member member = memberRepository.findByEmail(username);
+        if (member == null) {
             throw ErrorCode.MEMBER_NOT_FOUND.throwException();
         }
-        return member.orElse(null);
+        return member;
     }
 }

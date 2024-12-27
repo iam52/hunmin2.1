@@ -2,7 +2,7 @@ package com.hunmin.domain.controller;
 
 import com.hunmin.domain.dto.board.BoardResponseDTO;
 import com.hunmin.domain.dto.bookmark.BookmarkResponse;
-import com.hunmin.domain.dto.member.CustomUserDetails;
+import com.hunmin.global.security.CustomUserDetails;
 import com.hunmin.domain.repository.MemberRepository;
 import com.hunmin.domain.service.BookmarkService;
 import lombok.RequiredArgsConstructor;

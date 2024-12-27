@@ -1,11 +1,11 @@
-package com.hunmin.domain.jwt;
+package com.hunmin.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hunmin.domain.entity.MemberLevel;
 import com.hunmin.domain.entity.MemberRole;
 import com.hunmin.domain.entity.RefreshEntity;
+import com.hunmin.domain.jwt.JWTUtil;
 import com.hunmin.domain.repository.RefreshRepository;
-import com.hunmin.global.security.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,13 +28,13 @@ import java.util.Map;
 
 // 로그인 요청 처리 클래스
 @Log4j2
-public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshRepository refreshRepository) {
+    public CustomLoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshRepository refreshRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.refreshRepository = refreshRepository;

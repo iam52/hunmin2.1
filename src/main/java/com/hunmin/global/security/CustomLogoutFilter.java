@@ -1,5 +1,6 @@
-package com.hunmin.domain.jwt;
+package com.hunmin.global.security;
 
+import com.hunmin.domain.jwt.JWTUtil;
 import com.hunmin.domain.repository.RefreshRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;

@@ -1,4 +1,4 @@
-package com.hunmin.domain.config;
+package com.hunmin.global.config;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;

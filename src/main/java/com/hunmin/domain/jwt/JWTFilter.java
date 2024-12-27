@@ -1,9 +1,9 @@
 package com.hunmin.domain.jwt;
 
-import com.hunmin.domain.dto.member.CustomUserDetails;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.MemberRole;
 import com.hunmin.domain.service.MemberService;
+import com.hunmin.global.security.CustomUserDetails;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

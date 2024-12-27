@@ -1,9 +1,9 @@
-package com.hunmin.global.security;
+package com.hunmin.global.config;
 
-import com.hunmin.domain.jwt.CustomLogoutFilter;
+import com.hunmin.global.security.CustomLogoutFilter;
 import com.hunmin.domain.jwt.JWTFilter;
 import com.hunmin.domain.jwt.JWTUtil;
-import com.hunmin.domain.jwt.LoginFilter;
+import com.hunmin.global.security.CustomLoginFilter;
 import com.hunmin.domain.repository.RefreshRepository;
 import com.hunmin.domain.service.MemberService;
 import lombok.extern.log4j.Log4j2;
@@ -60,8 +60,8 @@ public class SecurityConfig {
 
         AuthenticationManager authManager = authenticationManager(authenticationConfiguration);
 
-        LoginFilter loginFilter = new LoginFilter(authManager, jwtUtil, refreshRepository);
-        loginFilter.setFilterProcessesUrl("/api/members/login");
+        CustomLoginFilter customLoginFilter = new CustomLoginFilter(authManager, jwtUtil, refreshRepository);
+        customLoginFilter.setFilterProcessesUrl("/api/members/login");
 
         http
                 .cors((corsCustomizer -> corsCustomizer.configurationSource(request -> {
@@ -95,7 +95,7 @@ public class SecurityConfig {
                         .anyRequest().permitAll())
 
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JWTFilter(jwtUtil, memberService), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class);
         return http.build();

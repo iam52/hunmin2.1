@@ -1,4 +1,4 @@
-package com.hunmin.domain.config;
+package com.hunmin.global.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
