@@ -1,6 +1,5 @@
 package com.hunmin.domain.entity;
 
-import com.hunmin.domain.dto.member.MemberDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
@@ -61,10 +60,6 @@ public class Member extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bookmark> bookmarks = new ArrayList<>();
-
-    public MemberDTO toDTO() {
-        return new MemberDTO(this);
-    }
 
     public void updatePassword(String password) {
         this.password = password;

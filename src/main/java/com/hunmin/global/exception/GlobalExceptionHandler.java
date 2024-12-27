@@ -66,4 +66,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("=== 예상치 못한 에러 발생: ", exception);
         return buildErrorResponse(exception, exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
+
+    // 412 에러 예외 처리
+    @Override
+    @Hidden
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode status,
+                                                                  WebRequest request
+    ) {
+        ErrorResponse errorResponseDto = new ErrorResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(), "입력값 검증에 실패했습니다.", LocalDateTime.now()
+        );
+        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
+            errorResponseDto.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+        return ResponseEntity.unprocessableEntity().body(errorResponseDto);
+    }
 }
