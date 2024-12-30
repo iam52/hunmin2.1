@@ -37,23 +37,18 @@ public class MemberService {
 
     // 회원 가입
     public MemberResponse register(MemberRequest memberRequest) {
-        String email = memberRequest.getEmail();
-        String password = memberRequest.getPassword();
-        boolean isEmailRegistered = memberRepository.existsByEmail(email);
-        if (isEmailRegistered) {
+        if (memberRepository.existsByEmail(memberRequest.getEmail())) {
             throw ErrorCode.MEMBER_ALREADY_EXIST.throwException();
         }
-        MemberLevel memberLevel = memberRequest.getLevel() != null ? memberRequest.getLevel() : MemberLevel.BEGINNER;
-        Member member = Member.builder()
-                .email(email)
-                .password(bCryptPasswordEncoder.encode(password))
+        Member savedMember = memberRepository.save(Member.builder()
+                .email(memberRequest.getEmail())
+                .password(bCryptPasswordEncoder.encode(memberRequest.getPassword()))
                 .nickname(memberRequest.getNickname())
                 .country(memberRequest.getCountry())
                 .memberRole(MemberRole.USER)
-                .level(memberLevel)
+                .level(Optional.ofNullable(memberRequest.getLevel()).orElse(MemberLevel.BEGINNER))
                 .image(memberRequest.getImage())
-                .build();
-        Member savedMember = memberRepository.save(member);
+                .build());
         return MemberResponse.from(savedMember);
     }
 

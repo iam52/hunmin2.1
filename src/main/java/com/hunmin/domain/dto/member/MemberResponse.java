@@ -1,5 +1,6 @@
 package com.hunmin.domain.dto.member;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.MemberLevel;
 import com.hunmin.domain.entity.MemberRole;
@@ -18,6 +19,8 @@ public class MemberResponse {
     private String country;
     private MemberRole memberRole;
     private String image;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
 
     // Entity -> Response 변환 메서드
