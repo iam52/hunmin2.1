@@ -57,6 +57,12 @@ public class MemberService {
         return MemberResponse.from(savedMember);
     }
 
+    // 회원 단 건 조회
+    public MemberResponse getMember(String nickname) {
+        Member foundMember = memberRepository.findByNickname(nickname).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        return MemberResponse.from(foundMember);
+    }
+
     // 회원 정보 업데이트
     public void updateMember(Long id, MemberRequest memberRequest) {
         Optional<Member> optionalMember = memberRepository.findById(id);
@@ -133,7 +139,7 @@ public class MemberService {
     }
 
     public MemberRequest readUserInfo(String email) {
-        Member member = memberRepository.findByEmail(email);
+        Member member = memberRepository.findByEmail(email).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
         if (member == null) {
             throw new CustomException((ErrorCode.MEMBER_NOT_FOUND));
         }

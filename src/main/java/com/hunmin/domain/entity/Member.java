@@ -30,6 +30,7 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private String password;
 
+    @Column(unique = true)
     private String nickname;
 
     private String country;
