@@ -37,7 +37,7 @@ public class FollowService {
     public FollowRequestDTO register(String myEmail, Long memberId) {
         try {
             Member followee = memberRepository.findById(memberId).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
-            Member owner = memberRepository.findByEmail(myEmail);
+            Member owner = memberRepository.findByEmail(myEmail).get();
 
             if (followee.getMemberId().equals(owner.getMemberId())) {
                 throw ErrorCode.FOLLOW_CREATE_FAIL.throwException();
@@ -96,7 +96,7 @@ public class FollowService {
     public FollowRequestDTO registerAccept(String myEmail, Long memberId) {
         try {
             Member followee = memberRepository.findById(memberId).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
-            Member owner = memberRepository.findByEmail(myEmail);
+            Member owner = memberRepository.findByEmail(myEmail).get();
 
             // 중복체크
             Optional<Follow> foundMember = followRepository.findByMemberId(owner.getMemberId(),memberId);
@@ -126,7 +126,7 @@ public class FollowService {
     // 팔로이 삭제
     public Boolean remove(String myEmail, Long memberId) {
         try {
-            Member owner = memberRepository.findByEmail(myEmail);
+            Member owner = memberRepository.findByEmail(myEmail).get();
             Follow foundMember = followRepository.findByMemberId(owner.getMemberId(), memberId)
                     .orElseThrow(ErrorCode.FOLLOW_NOT_FOUND::throwException);
 
@@ -142,7 +142,7 @@ public class FollowService {
     // 팔로이 리스트 조회
     public Page<FollowRequestDTO> readPage(PageRequestDTO pageRequestDTO, String email) {
         try {
-            Member member = memberRepository.findByEmail(email);
+            Member member = memberRepository.findByEmail(email).get();
             Sort sort = Sort.by("followId").descending();
             Pageable pageable = pageRequestDTO.getPageable(sort);
             return followRepository.getFollowPage(member.getMemberId(), pageable);
@@ -156,7 +156,7 @@ public class FollowService {
     @Transactional
     public Boolean turnNotification(String myEmail, Long memberId) {
         try {
-            Member owner = memberRepository.findByEmail(myEmail);
+            Member owner = memberRepository.findByEmail(myEmail).get();
             Follow foundMember = followRepository.findByMemberId(memberId,owner.getMemberId())
                     .orElseThrow(ErrorCode.FOLLOW_NOT_FOUND::throwException);
 
@@ -176,7 +176,7 @@ public class FollowService {
     @Transactional
     public Boolean blockFollower(String myEmail, Long memberId) {
         try {
-            Member owner = memberRepository.findByEmail(myEmail);
+            Member owner = memberRepository.findByEmail(myEmail).get();
             Follow foundMember = followRepository.findByMemberId(memberId,owner.getMemberId())
                     .orElseThrow(ErrorCode.FOLLOW_NOT_FOUND::throwException);
             log.info("A owner {}",owner);

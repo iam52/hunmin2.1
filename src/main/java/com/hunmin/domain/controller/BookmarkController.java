@@ -35,7 +35,7 @@ public class BookmarkController {
     //북마크 삭제
     @DeleteMapping("/{boardId}")
     public ResponseEntity<String> deleteBookmark(@PathVariable Long boardId, Authentication authentication) {
-        Member member = memberRepository.findByEmail(authentication.getName());
+        Member member = memberRepository.findByEmail(authentication.getName()).get();
         bookmarkService.deleteBookmark(boardId, member.getMemberId());
         return ResponseEntity.ok("북마크 삭제");
     }

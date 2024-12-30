@@ -67,7 +67,7 @@ public class BoardController {
     @PutMapping("/{boardId}")
     @Operation(summary = "게시글 수정", description = "게시글을 수정할 때 사용하는 API")
     public ResponseEntity<BoardResponseDTO> updateBoard(@PathVariable Long boardId, @RequestBody BoardRequestDTO boardRequestDTO, Authentication authentication) {
-        Long id = memberRepository.findByEmail(authentication.getName()).getMemberId();
+        Long id = memberRepository.findByEmail(authentication.getName()).get().getMemberId();
         if (!id.equals(boardRequestDTO.getMemberId())) {
             throw ErrorCode.BOARD_UPDATE_FAIL.throwException();
         }
@@ -78,7 +78,7 @@ public class BoardController {
     @DeleteMapping("/{boardId}")
     @Operation(summary = "게시글 삭제", description = "게시글을 삭제할 때 사용하는 API")
     public ResponseEntity<Map<String, String>> deleteBoard(@PathVariable Long boardId, Authentication authentication) {
-        Long id = memberRepository.findByEmail(authentication.getName()).getMemberId();
+        Long id = memberRepository.findByEmail(authentication.getName()).get().getMemberId();
         if (!id.equals(boardRepository.findById(boardId).get().getMember().getMemberId())) {
             throw ErrorCode.BOARD_DELETE_FAIL.throwException();
         }

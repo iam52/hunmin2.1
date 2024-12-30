@@ -27,7 +27,7 @@ public class WordService {
     private final WordRepository wordRepository;
     private final MemberRepository memberRepository;
     private Member getMember(String username) {
-        Member member = memberRepository.findByEmail(username);
+        Member member = memberRepository.findByEmail(username).get();
         if (member == null) {
             throw ErrorCode.MEMBER_NOT_FOUND.throwException();
         }

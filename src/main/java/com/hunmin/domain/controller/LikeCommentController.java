@@ -21,7 +21,7 @@ public class LikeCommentController {
     //좋아요 등록
     @PostMapping("/{commentId}")
     public ResponseEntity<String> createLikeComment(@PathVariable Long commentId, Authentication authentication) {
-        Long memberId = memberRepository.findByEmail(authentication.getName()).getMemberId();
+        Long memberId = memberRepository.findByEmail(authentication.getName()).get().getMemberId();
         likeCommentService.createLikeComment(memberId, commentId);
         return ResponseEntity.ok().build();
     }
@@ -29,7 +29,7 @@ public class LikeCommentController {
     //좋아요 삭제
     @DeleteMapping("/{commentId}")
     public ResponseEntity<String> deleteLikeComment(@PathVariable Long commentId, Authentication authentication) {
-        Long memberId = memberRepository.findByEmail(authentication.getName()).getMemberId();
+        Long memberId = memberRepository.findByEmail(authentication.getName()).get().getMemberId();
         likeCommentService.deleteLikeComment(memberId, commentId);
         return ResponseEntity.ok().build();
     }
