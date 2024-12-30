@@ -4,6 +4,7 @@ import com.hunmin.domain.entity.Member;
 import com.hunmin.domain.entity.MemberLevel;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,8 @@ public class MemberRequest {
     @NotBlank(message = "비밀번호는 필수입니다")
     private String password;
 
+    @NotBlank
+    @Pattern(regexp = "^[a-zA-Z0-9가-힣]{2,10}$", message = "닉네임은 2~10자의 한글, 영문, 숫자만 가능합니다")
     private String nickname;
 
     private String country;

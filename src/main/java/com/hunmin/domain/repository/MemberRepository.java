@@ -14,8 +14,8 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 기본 단일 조회
-    Member findByEmail(String email);
-    Member findByNickname(String nickname);
+    Optional<Member> findByEmail(String email);
+    Optional<Member> findByNickname(String nickname);
 
     // 중복 검사
     boolean existsByEmail(String email);
@@ -23,10 +23,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 조건 조회
     Optional<Member> findByEmailAndNickname(String email, String nickname);
-
-    // 페이징된 전체 회원 조회
-    @Query("SELECT m FROM Member m ORDER BY m.createdAt DESC")
-    Page<Member> findAllMembers(Pageable pageable);
 
     // 팔로워 목록 조회
     @Query("SELECT m FROM Member m JOIN Follow f ON f.follower = m WHERE f.followee.memberId = :memberId")

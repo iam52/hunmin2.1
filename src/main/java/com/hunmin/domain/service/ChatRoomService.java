@@ -36,7 +36,7 @@ public class ChatRoomService {
 
     // 관련 채팅방 조회
     public List<ChatRoomRequestDTO> findRoomByEmail(String email) {
-        Member me = memberRepository.findByEmail(email);
+        Member me = memberRepository.findByEmail(email).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
 
         List<Object> partnerNameAndChatRoom = roomStorage.values(me.getNickname());
 
@@ -65,8 +65,8 @@ public class ChatRoomService {
 
     // 채팅방 생성
     public ChatRoomRequestDTO createChatRoomByNickName(String partnerName, String myEmail) {
-        Member partner = memberRepository.findByNickname(partnerName);
-        Member me = memberRepository.findByEmail(myEmail);
+        Member partner = memberRepository.findByNickname(partnerName).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        Member me = memberRepository.findByEmail(myEmail).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
         validateNoDuplicateRoom(me.getNickname(), partnerName);
 
         ChatRoom chatRoom = ChatRoom.builder().member(me).build();
@@ -94,11 +94,11 @@ public class ChatRoomService {
 
     // 채팅방 삭제
     public Boolean deleteChatRoom(Long chatRoomId, String partnerName, String meEmail) {
-        Member partner = memberRepository.findByNickname(partnerName);
+        Member partner = memberRepository.findByNickname(partnerName).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
         if (partner == null) {
             return false;
         }
-        Member me = memberRepository.findByEmail(meEmail);
+        Member me = memberRepository.findByEmail(meEmail).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(ErrorCode.CHAT_ROOM_NOT_FOUND::throwException);
         if (roomStorage.get(me.getNickname(), partnerName) != null) {

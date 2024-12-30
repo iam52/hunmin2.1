@@ -65,7 +65,7 @@ class MemberRepositoryTest {
     @DisplayName("이메일로 조회")
     void findByEmailTest() {
         // when
-        Member foundMember = memberRepository.findByEmail(member1.getEmail());
+        Member foundMember = memberRepository.findByEmail(member1.getEmail()).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
 
         // then
         assertNotNull(foundMember);
@@ -76,7 +76,7 @@ class MemberRepositoryTest {
     @DisplayName("닉네임으로 조회")
     void findByNicknameTest() {
         // when
-        Member foundMember = memberRepository.findByNickname(member2.getNickname());
+        Member foundMember = memberRepository.findByNickname(member2.getNickname()).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
 
         // then
         assertNotNull(foundMember);
@@ -110,18 +110,5 @@ class MemberRepositoryTest {
         assertNotNull(foundMember);
         assertEquals(member2.getEmail(), foundMember.getEmail());
         assertEquals(member2.getNickname(), foundMember.getNickname());
-    }
-
-    @Test
-    @DisplayName("페이징된 전체 회원 조회")
-    void findAllMembersTest() {
-        // when
-        Pageable pageable = PageRequest.of(0, 3);
-        Page<Member> memberPage = memberRepository.findAllMembers(pageable);
-
-        // then
-        assertEquals(3, memberPage.getContent().size());
-        assertEquals(15, memberPage.getTotalElements());
-        assertEquals(5, memberPage.getTotalPages());
     }
 }
