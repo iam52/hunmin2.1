@@ -1,13 +1,13 @@
 //package com.hunmin.domain.service;
 //
-//import com.hunmin.domain.dto.chat.ChatMessageRequestDTO;
-//import com.hunmin.domain.dto.chat.ChatRoomDTO;
-//import com.hunmin.domain.entity.ChatRoom;
-//import com.hunmin.domain.entity.Member;
-//import com.hunmin.domain.entity.MemberRole;
+//import com.hunmin.domain.chatmessage.dto.ChatMessageRequestDTO;
+//import com.hunmin.domain.chatmessage.dto.ChatRoomDTO;
+//import com.hunmin.domain.chatroom.entity.ChatRoom;
+//import com.hunmin.domain.member.entity.Member;
+//import com.hunmin.domain.member.entity.MemberRole;
 //import com.hunmin.domain.exception.ChatRoomException;
-//import com.hunmin.domain.repository.ChatRoomRepository;
-//import com.hunmin.domain.repository.MemberRepository;
+//import com.hunmin.domain.chatroom.repository.ChatRoomRepository;
+//import com.hunmin.domain.member.repository.MemberRepository;
 //import lombok.extern.log4j.Log4j2;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;

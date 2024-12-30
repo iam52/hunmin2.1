@@ -1,8 +1,10 @@
 package com.hunmin.domain.repository;
 
-import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.entity.Notification;
-import com.hunmin.domain.entity.NotificationType;
+import com.hunmin.domain.member.entity.Member;
+import com.hunmin.domain.notification.entity.Notification;
+import com.hunmin.domain.notification.entity.NotificationType;
+import com.hunmin.domain.member.repository.MemberRepository;
+import com.hunmin.domain.notification.repository.NotificationRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

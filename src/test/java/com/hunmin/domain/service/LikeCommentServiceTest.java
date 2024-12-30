@@ -1,12 +1,13 @@
 package com.hunmin.domain.service;
 
-import com.hunmin.domain.entity.Board;
-import com.hunmin.domain.entity.Comment;
-import com.hunmin.domain.entity.LikeComment;
-import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.repository.CommentRepository;
-import com.hunmin.domain.repository.LikeCommentRepository;
-import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.domain.board.entity.Board;
+import com.hunmin.domain.comment.entity.Comment;
+import com.hunmin.domain.likecomment.entity.LikeComment;
+import com.hunmin.domain.member.entity.Member;
+import com.hunmin.domain.comment.repository.CommentRepository;
+import com.hunmin.domain.likecomment.repository.LikeCommentRepository;
+import com.hunmin.domain.likecomment.service.LikeCommentService;
+import com.hunmin.domain.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

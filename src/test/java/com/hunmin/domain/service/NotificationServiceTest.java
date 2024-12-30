@@ -1,14 +1,15 @@
 package com.hunmin.domain.service;
 
-import com.hunmin.domain.dto.notification.NotificationRequestDTO;
-import com.hunmin.domain.dto.notification.NotificationResponseDTO;
-import com.hunmin.domain.dto.notification.NotificationSendDTO;
-import com.hunmin.domain.handler.SseEmitters;
-import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.entity.Notification;
-import com.hunmin.domain.entity.NotificationType;
-import com.hunmin.domain.repository.MemberRepository;
-import com.hunmin.domain.repository.NotificationRepository;
+import com.hunmin.domain.notification.dto.NotificationRequestDTO;
+import com.hunmin.domain.notification.dto.NotificationResponseDTO;
+import com.hunmin.domain.notification.dto.NotificationSendDTO;
+import com.hunmin.domain.notification.service.NotificationService;
+import com.hunmin.global.handler.SseEmitters;
+import com.hunmin.domain.member.entity.Member;
+import com.hunmin.domain.notification.entity.Notification;
+import com.hunmin.domain.notification.entity.NotificationType;
+import com.hunmin.domain.member.repository.MemberRepository;
+import com.hunmin.domain.notification.repository.NotificationRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

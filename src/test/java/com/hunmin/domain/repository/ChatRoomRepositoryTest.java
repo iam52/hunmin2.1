@@ -1,8 +1,14 @@
 package com.hunmin.domain.repository;
 
-import com.hunmin.domain.dto.chat.ChatRoomDTO;
-import com.hunmin.domain.dto.chat.MessageType;
-import com.hunmin.domain.entity.*;
+import com.hunmin.domain.chatmessage.dto.ChatRoomDTO;
+import com.hunmin.domain.chatmessage.dto.MessageType;
+import com.hunmin.domain.chatmessage.entity.ChatMessage;
+import com.hunmin.domain.chatroom.entity.ChatRoom;
+import com.hunmin.domain.chatroom.repository.ChatRoomRepository;
+import com.hunmin.domain.member.entity.Member;
+import com.hunmin.domain.member.entity.MemberLevel;
+import com.hunmin.domain.member.entity.MemberRole;
+import com.hunmin.domain.member.repository.MemberRepository;
 import com.hunmin.global.exception.ErrorCode;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;

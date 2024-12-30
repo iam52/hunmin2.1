@@ -1,15 +1,13 @@
 package com.hunmin.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hunmin.domain.dto.chat.ChatRoomRequestDTO;
-import com.hunmin.domain.pubsub.RedisSubscriber;
+import com.hunmin.global.pubsub.RedisSubscriber;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;

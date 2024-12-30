@@ -1,8 +1,11 @@
 package com.hunmin.domain.repository;
 
-import com.hunmin.domain.entity.Comment;
-import com.hunmin.domain.entity.LikeComment;
-import com.hunmin.domain.entity.Member;
+import com.hunmin.domain.comment.entity.Comment;
+import com.hunmin.domain.comment.repository.CommentRepository;
+import com.hunmin.domain.likecomment.entity.LikeComment;
+import com.hunmin.domain.member.entity.Member;
+import com.hunmin.domain.likecomment.repository.LikeCommentRepository;
+import com.hunmin.domain.member.repository.MemberRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

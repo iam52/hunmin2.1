@@ -1,13 +1,10 @@
 package com.hunmin.domain.service;
 
-import com.hunmin.domain.dto.member.MemberRequest;
-import com.hunmin.domain.dto.member.MemberResponse;
-import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.entity.MemberLevel;
-import com.hunmin.domain.entity.MemberRole;
-import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.domain.member.dto.MemberRequest;
+import com.hunmin.domain.member.dto.MemberResponse;
+import com.hunmin.domain.member.repository.MemberRepository;
+import com.hunmin.domain.member.service.MemberService;
 import com.hunmin.global.exception.CustomException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

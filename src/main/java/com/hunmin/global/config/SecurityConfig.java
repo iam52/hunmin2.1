@@ -1,11 +1,11 @@
 package com.hunmin.global.config;
 
-import com.hunmin.global.security.CustomLogoutFilter;
-import com.hunmin.domain.jwt.JWTFilter;
-import com.hunmin.domain.jwt.JWTUtil;
-import com.hunmin.global.security.CustomLoginFilter;
-import com.hunmin.domain.repository.RefreshRepository;
-import com.hunmin.domain.service.MemberService;
+import com.hunmin.global.security.filter.CustomLogoutFilter;
+import com.hunmin.global.security.jwt.JWTFilter;
+import com.hunmin.global.security.jwt.JWTUtil;
+import com.hunmin.global.security.filter.CustomLoginFilter;
+import com.hunmin.global.security.jwt.RefreshRepository;
+import com.hunmin.domain.member.service.MemberService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

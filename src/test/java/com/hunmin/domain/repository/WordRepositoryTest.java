@@ -4,9 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.hunmin.domain.entity.Board;
-import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.entity.Word;
+import com.hunmin.domain.member.entity.Member;
+import com.hunmin.domain.word.entity.Word;
+import com.hunmin.domain.member.repository.MemberRepository;
+import com.hunmin.domain.word.repository.WordRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

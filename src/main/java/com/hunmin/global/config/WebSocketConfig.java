@@ -1,6 +1,6 @@
 package com.hunmin.global.config;
 
-import com.hunmin.domain.handler.StompHandler;
+import com.hunmin.global.handler.StompHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;

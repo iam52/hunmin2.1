@@ -1,23 +1,20 @@
 package com.hunmin.domain.repository;
 
-import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.entity.MemberLevel;
-import com.hunmin.domain.entity.MemberRole;
-import com.hunmin.domain.entity.Notice;
+import com.hunmin.domain.member.entity.Member;
+import com.hunmin.domain.member.entity.MemberLevel;
+import com.hunmin.domain.member.entity.MemberRole;
+import com.hunmin.domain.notice.entity.Notice;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
+import com.hunmin.domain.member.repository.MemberRepository;
+import com.hunmin.domain.notice.repository.NoticeRepository;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;

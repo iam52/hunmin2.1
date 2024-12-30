@@ -1,12 +1,13 @@
 package com.hunmin.domain.service;
 
-import com.hunmin.domain.dto.board.BoardResponseDTO;
-import com.hunmin.domain.entity.Board;
-import com.hunmin.domain.entity.Bookmark;
-import com.hunmin.domain.entity.Member;
-import com.hunmin.domain.repository.BoardRepository;
-import com.hunmin.domain.repository.BookmarkRepository;
-import com.hunmin.domain.repository.MemberRepository;
+import com.hunmin.domain.board.dto.BoardResponseDTO;
+import com.hunmin.domain.board.entity.Board;
+import com.hunmin.domain.bookmark.entity.Bookmark;
+import com.hunmin.domain.bookmark.service.BookmarkService;
+import com.hunmin.domain.member.entity.Member;
+import com.hunmin.domain.board.repository.BoardRepository;
+import com.hunmin.domain.bookmark.repository.BookmarkRepository;
+import com.hunmin.domain.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

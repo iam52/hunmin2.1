@@ -1,6 +1,8 @@
 package com.hunmin.domain.repository;
 
-import com.hunmin.domain.entity.Follow;
+import com.hunmin.domain.follow.entity.Follow;
+import com.hunmin.domain.follow.repository.FollowRepository;
+import com.hunmin.domain.member.repository.MemberRepository;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
