@@ -9,7 +9,6 @@ import com.hunmin.domain.entity.RefreshEntity;
 import com.hunmin.domain.jwt.JWTUtil;
 import com.hunmin.domain.repository.RefreshRepository;
 import com.hunmin.domain.service.MemberService;
-import com.hunmin.global.global.ApiResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,9 +43,16 @@ public class MemberController {
 
     @PostMapping
     @Operation(summary = "회원 가입", description = "회원 가입할 때 사용하는 API")
-    public ResponseEntity<ApiResponse<MemberResponse>> createMember(@Valid @RequestBody MemberRequest memberRequest) {
+    public ResponseEntity<MemberResponse> createMember(@Valid @RequestBody MemberRequest memberRequest) {
         MemberResponse response = memberService.register(memberRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(201, "회원 가입 완료", response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{nickname}")
+    @Operation(summary = "회원 검색", description = "닉네임으로 회원 검색")
+    public ResponseEntity<MemberResponse> searchMember(@PathVariable String nickname) {
+        MemberResponse memberResponse = memberService.getMember(nickname);
+        return ResponseEntity.ok(memberResponse);
     }
 
     @PutMapping("/{memberId}")
