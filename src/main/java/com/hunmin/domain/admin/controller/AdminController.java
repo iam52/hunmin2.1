@@ -3,7 +3,7 @@ package com.hunmin.domain.admin.controller;
 import com.hunmin.domain.admin.service.AdminService;
 import com.hunmin.domain.board.dto.BoardResponseDTO;
 import com.hunmin.domain.comment.dto.CommentResponseDTO;
-import com.hunmin.domain.member.dto.MemberStatusDTO;
+import com.hunmin.domain.member.dto.MemberStatus;
 import com.hunmin.global.common.PageRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,9 +35,9 @@ public class AdminController {
     @Operation(summary = "회원 검색", description = "회원을 ID로 검색할 때 사용하는 API")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/member/{memberId}")
-    public ResponseEntity<MemberStatusDTO> getMemberById(@PathVariable Long memberId) {
+    public ResponseEntity<MemberStatus> getMemberById(@PathVariable Long memberId) {
         // AdminService의 getMemberByMemberId 메서드를 호출하여 회원 정보를 가져옴
-        MemberStatusDTO memberStatus = adminService.getMemberByMemberId(memberId);
+        MemberStatus memberStatus = adminService.getMemberByMemberId(memberId);
         return ResponseEntity.ok(memberStatus);
     }
 
@@ -45,9 +45,9 @@ public class AdminController {
     @Operation(summary = "회원 검색", description = "회원을 닉네임으로 검색할 때 사용하는 API")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/member/nickname/{username}")
-    public ResponseEntity<MemberStatusDTO> getMemberByNickname(@PathVariable String username) {
+    public ResponseEntity<MemberStatus> getMemberByNickname(@PathVariable String username) {
         // AdminService의 getMemberByNickname 메서드를 호출하여 회원 정보를 가져옴
-        MemberStatusDTO memberStatus = adminService.getMemberByNickname(username);
+        MemberStatus memberStatus = adminService.getMemberByNickname(username);
         return ResponseEntity.ok(memberStatus);
     }
 
@@ -55,9 +55,9 @@ public class AdminController {
     @Operation(summary = "회원 조회", description = "회원을 목록을 조회할 때 사용하는 API")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/members")
-    public ResponseEntity<Page<MemberStatusDTO>> getAllMembers(PageRequestDTO pageRequestDTO) {
+    public ResponseEntity<Page<MemberStatus>> getAllMembers(PageRequestDTO pageRequestDTO) {
         // AdminService의 getAllMembers 메서드를 호출하여 회원 목록을 가져옴
-        Page<MemberStatusDTO> members = adminService.getAllMembers(pageRequestDTO);
+        Page<MemberStatus> members = adminService.getAllMembers(pageRequestDTO);
         return ResponseEntity.ok(members);
     }
 

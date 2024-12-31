@@ -3,7 +3,7 @@ package com.hunmin.domain.member.dto;
 import lombok.Getter;
 
 @Getter
-public class PasswordFindRequestDto {
+public class PasswordFindRequest {
 
     private String email;
     private String nickname;

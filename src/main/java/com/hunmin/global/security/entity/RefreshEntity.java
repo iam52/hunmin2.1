@@ -1,4 +1,4 @@
-package com.hunmin.global.security.jwt;
+package com.hunmin.global.security.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +13,6 @@ import lombok.Setter;
 @Setter
 @Table(name = "refresh_tokens")
 public class RefreshEntity {
-
     @Id
     @Column(nullable = false, unique = true)
     private String email;

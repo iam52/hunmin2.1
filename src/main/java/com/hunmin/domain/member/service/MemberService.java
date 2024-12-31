@@ -2,8 +2,8 @@ package com.hunmin.domain.member.service;
 
 import com.hunmin.domain.member.dto.MemberRequest;
 import com.hunmin.domain.member.dto.MemberResponse;
-import com.hunmin.domain.member.dto.PasswordFindRequestDto;
-import com.hunmin.domain.member.dto.PasswordUpdateRequestDto;
+import com.hunmin.domain.member.dto.PasswordFindRequest;
+import com.hunmin.domain.member.dto.PasswordUpdateRequest;
 import com.hunmin.domain.member.entity.Member;
 import com.hunmin.domain.member.entity.MemberLevel;
 import com.hunmin.domain.member.entity.MemberRole;
@@ -85,20 +85,20 @@ public class MemberService {
     }
 
     // 비밀번호 재설정을 위한 사용자 검증
-    public ResponseEntity<?> verifyUserForPasswordReset(PasswordFindRequestDto passwordFindRequestDto) {
+    public ResponseEntity<?> verifyUserForPasswordReset(PasswordFindRequest passwordFindRequest) {
         return memberRepository.findByEmailAndNickname(
-                        passwordFindRequestDto.getEmail(), passwordFindRequestDto.getNickname())
+                        passwordFindRequest.getEmail(), passwordFindRequest.getNickname())
                 .map(m -> ResponseEntity.ok("사용자 확인 완료"))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다."));
     }
 
     // 비밀번호 재설정
-    public ResponseEntity<?> updatePassword(PasswordUpdateRequestDto passwordUpdateRequestDto) {
+    public ResponseEntity<?> updatePassword(PasswordUpdateRequest passwordUpdateRequest) {
         try {
             Member member = memberRepository.findByEmailAndNickname(
-                            passwordUpdateRequestDto.getEmail(), passwordUpdateRequestDto.getNickname())
+                            passwordUpdateRequest.getEmail(), passwordUpdateRequest.getNickname())
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-            String encodedPassword = bCryptPasswordEncoder.encode(passwordUpdateRequestDto.getNewPassword());
+            String encodedPassword = bCryptPasswordEncoder.encode(passwordUpdateRequest.getNewPassword());
             member.updatePassword(encodedPassword);
             memberRepository.save(member);
             return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");

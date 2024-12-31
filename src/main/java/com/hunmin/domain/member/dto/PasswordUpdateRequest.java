@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class PasswordUpdateRequestDto {
+public class PasswordUpdateRequest {
 
     @Email
     private String email;

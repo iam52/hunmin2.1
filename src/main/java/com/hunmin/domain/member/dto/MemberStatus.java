@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MemberStatusDTO {
+public class MemberStatus {
     private Long memberId;
     private String email;
     private String nickname;
@@ -16,7 +16,7 @@ public class MemberStatusDTO {
     private int boardCount;
     private int commentCount;
 
-    public MemberStatusDTO(Member member , int boardCount, int commentCount) {
+    public MemberStatus(Member member , int boardCount, int commentCount) {
         this.memberId = member.getMemberId();
         this.email = member.getEmail();
         this.nickname = member.getNickname();

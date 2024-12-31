@@ -2,12 +2,12 @@ package com.hunmin.domain.member.controller;
 
 import com.hunmin.domain.member.dto.MemberRequest;
 import com.hunmin.domain.member.dto.MemberResponse;
-import com.hunmin.domain.member.dto.PasswordFindRequestDto;
-import com.hunmin.domain.member.dto.PasswordUpdateRequestDto;
+import com.hunmin.domain.member.dto.PasswordFindRequest;
+import com.hunmin.domain.member.dto.PasswordUpdateRequest;
 import com.hunmin.domain.member.entity.MemberRole;
-import com.hunmin.global.security.jwt.RefreshEntity;
+import com.hunmin.global.security.entity.RefreshEntity;
 import com.hunmin.global.security.jwt.JWTUtil;
-import com.hunmin.global.security.jwt.RefreshRepository;
+import com.hunmin.global.security.repository.RefreshRepository;
 import com.hunmin.domain.member.service.MemberService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -158,12 +158,12 @@ public class MemberController {
     }
 
     @PostMapping("/password/verify")
-    public ResponseEntity<?> verifyUser(@RequestBody PasswordFindRequestDto passwordFindRequestDto) {
-        return memberService.verifyUserForPasswordReset(passwordFindRequestDto);
+    public ResponseEntity<?> verifyUser(@RequestBody PasswordFindRequest passwordFindRequest) {
+        return memberService.verifyUserForPasswordReset(passwordFindRequest);
     }
 
     @PostMapping("/password/update")
-    public ResponseEntity<?> updatePassword(@RequestBody PasswordUpdateRequestDto passwordUpdateRequestDto) {
-        return memberService.updatePassword(passwordUpdateRequestDto);
+    public ResponseEntity<?> updatePassword(@RequestBody PasswordUpdateRequest passwordUpdateRequest) {
+        return memberService.updatePassword(passwordUpdateRequest);
     }
 }

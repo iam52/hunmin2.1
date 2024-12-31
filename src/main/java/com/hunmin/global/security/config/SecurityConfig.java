@@ -1,11 +1,13 @@
-package com.hunmin.global.config;
+package com.hunmin.global.security.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hunmin.global.security.filter.CustomLogoutFilter;
 import com.hunmin.global.security.jwt.JWTFilter;
 import com.hunmin.global.security.jwt.JWTUtil;
 import com.hunmin.global.security.filter.CustomLoginFilter;
-import com.hunmin.global.security.jwt.RefreshRepository;
+import com.hunmin.global.security.repository.RefreshRepository;
 import com.hunmin.domain.member.service.MemberService;
+import com.hunmin.global.util.CookieUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,11 +37,16 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
+    private final CookieUtil cookieUtil;
+    private final ObjectMapper objectMapper;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, RefreshRepository refreshRepository) {
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil,
+                          RefreshRepository refreshRepository, CookieUtil cookieUtil, ObjectMapper objectMapper) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
         this.refreshRepository = refreshRepository;
+        this.cookieUtil = cookieUtil;
+        this.objectMapper = objectMapper;
     }
 
     // AuthenticationManager를 Bean으로 등록
@@ -57,12 +64,9 @@ public class SecurityConfig {
     // SecurityFilterChain 체인 구성
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, MemberService memberService) throws Exception {
-
         AuthenticationManager authManager = authenticationManager(authenticationConfiguration);
-
-        CustomLoginFilter customLoginFilter = new CustomLoginFilter(authManager, jwtUtil, refreshRepository);
+        CustomLoginFilter customLoginFilter = new CustomLoginFilter(authManager, jwtUtil, refreshRepository, cookieUtil, objectMapper);
         customLoginFilter.setFilterProcessesUrl("/api/members/login");
-
         http
                 .cors((corsCustomizer -> corsCustomizer.configurationSource(request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
@@ -93,7 +97,6 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui.html").permitAll() // 추가
                         .requestMatchers("/api/notices/list/**").permitAll() // 추가
                         .anyRequest().permitAll())
-
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JWTFilter(jwtUtil, memberService), UsernamePasswordAuthenticationFilter.class)

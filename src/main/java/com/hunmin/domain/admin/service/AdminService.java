@@ -2,7 +2,7 @@ package com.hunmin.domain.admin.service;
 
 import com.hunmin.domain.board.dto.BoardResponseDTO;
 import com.hunmin.domain.comment.dto.CommentResponseDTO;
-import com.hunmin.domain.member.dto.MemberStatusDTO;
+import com.hunmin.domain.member.dto.MemberStatus;
 import com.hunmin.global.common.PageRequestDTO;
 import com.hunmin.domain.board.entity.Board;
 import com.hunmin.domain.comment.entity.Comment;
@@ -31,30 +31,30 @@ public class AdminService {
     private final MemberRepository memberRepository;
 
     //회원 검색
-    public MemberStatusDTO getMemberByMemberId(Long memberId) {
+    public MemberStatus getMemberByMemberId(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
         int boardCount = boardRepository.countByMemberId(member.getMemberId());
         int commentCount = commentRepository.countByMemberId(member.getMemberId());
-        return new MemberStatusDTO(member, boardCount, commentCount);
+        return new MemberStatus(member, boardCount, commentCount);
     }
 
     // 회원 닉네임으로 검색
-    public MemberStatusDTO getMemberByNickname(String username) {
+    public MemberStatus getMemberByNickname(String username) {
         Member member = memberRepository.findByNickname(username).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
         int boardCount = boardRepository.countByMemberId(member.getMemberId());
         int commentCount = commentRepository.countByMemberId(member.getMemberId());
-        return new MemberStatusDTO(member, boardCount, commentCount);
+        return new MemberStatus(member, boardCount, commentCount);
     }
 
     // 회원 목록 조회
-    public Page<MemberStatusDTO> getAllMembers(PageRequestDTO pageRequestDTO) {
+    public Page<MemberStatus> getAllMembers(PageRequestDTO pageRequestDTO) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, 10, sort);
         try {
             return memberRepository.findAll(pageable).map(member -> {
                 int boardCount = boardRepository.countByMemberId(member.getMemberId());
                 int commentCount = commentRepository.countByMemberId(member.getMemberId());
-                return new MemberStatusDTO(member, boardCount, commentCount);
+                return new MemberStatus(member, boardCount, commentCount);
             });
         } catch (Exception e) {
             log.error("getAllMembers : {}", e.getMessage());
