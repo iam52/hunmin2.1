@@ -57,9 +57,9 @@ public class MemberController {
 
     @PutMapping("/{memberId}")
     @Operation(summary = "회원 정보 수정", description = "등록된 회원의 정보를 수정할 때 사용하는 API")
-    public ResponseEntity<?> updateMember(@PathVariable Long memberId, @RequestBody MemberRequest memberRequest) {
-        memberService.updateMember(memberId, memberRequest);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<MemberResponse> updateMember(@PathVariable Long memberId, @RequestBody MemberRequest memberRequest) {
+        MemberResponse memberResponse = memberService.updateMember(memberId, memberRequest);
+        return ResponseEntity.ok(memberResponse);
     }
 
     @PostMapping("/uploads")

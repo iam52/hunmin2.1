@@ -59,29 +59,29 @@ public class MemberService {
     }
 
     // 회원 정보 업데이트
-    public void updateMember(Long id, MemberRequest memberRequest) {
-        Optional<Member> optionalMember = memberRepository.findById(id);
-        if (optionalMember.isPresent()) {
-            Member member = optionalMember.get();
-            if (memberRequest.getPassword() != null && !memberRequest.getPassword().isEmpty()) {
-                member.updatePassword(bCryptPasswordEncoder.encode(memberRequest.getPassword()));
+    public MemberResponse updateMember(Long id, MemberRequest memberRequest) {
+        Member member = memberRepository.findById(id).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        if (memberRequest.getNickname() != null && !member.getNickname().equals(memberRequest.getNickname())) {
+            if (memberRepository.existsByNickname(memberRequest.getNickname())) {
+                throw ErrorCode.MEMBER_ALREADY_EXIST.throwException();
             }
-            if (memberRequest.getNickname() != null) {
-                member.updateNickname(memberRequest.getNickname());
-            }
-            if (memberRequest.getCountry() != null) {
-                member.updateCountry(memberRequest.getCountry());
-            }
-            if (memberRequest.getLevel() != null) {
-                member.updateLevel(memberRequest.getLevel());
-            }
-            if (memberRequest.getImage() != null) {
-                member.updateImage(memberRequest.getImage());
-            }
-            memberRepository.save(member);
-        } else {
-            throw new RuntimeException("회원 정보를 찾을 수 없습니다.");
         }
+        if (memberRequest.getPassword() != null && !memberRequest.getPassword().isBlank()) {
+            member.updatePassword(bCryptPasswordEncoder.encode(memberRequest.getPassword()));
+        }
+        if (memberRequest.getNickname() != null && !memberRequest.getNickname().isBlank()) {
+            member.updateNickname(memberRequest.getNickname());
+        }
+        if (memberRequest.getCountry() != null && !memberRequest.getCountry().isBlank()) {
+            member.updateCountry(memberRequest.getCountry());
+        }
+        if (memberRequest.getLevel() != null) {
+            member.updateLevel(memberRequest.getLevel());
+        }
+        if (memberRequest.getImage() != null && !memberRequest.getImage().isBlank()) {
+            member.updateImage(memberRequest.getImage());
+        }
+        return MemberResponse.from(member);
     }
 
     // 비밀번호 재설정을 위한 사용자 검증
