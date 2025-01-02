@@ -96,7 +96,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         log.info("=== 생성된 refresh 토큰: {}", refresh);
 
         // refresh 토큰 저장
-        addRefreshEntity(email, refresh, REFRESH_TOKEN_EXPIRE_TIME);
+        addRefreshEntity(email, refresh);
 
         // 응답 dto 생성
         LoginResponse loginResponse = LoginResponse.builder()
@@ -115,7 +115,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setHeader("access", access);
-        response.addCookie(cookieUtil.createRefreshTokenCookie("refresh", refresh));
+        response.addCookie(CookieUtil.createRefreshTokenCookie("refresh", refresh));
         response.setStatus(HttpStatus.OK.value());
 
         objectMapper.writeValue(response.getWriter(), loginResponse);
@@ -129,12 +129,13 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
                 .orElseThrow(() -> new AuthenticationServiceException("=== Role not found ==="));
     }
 
-    private void addRefreshEntity(String email, String refresh, Long expiredMs) {
-        Date date = new Date(System.currentTimeMillis() + expiredMs);
-        RefreshEntity refreshEntity = new RefreshEntity();
-        refreshEntity.setEmail(email);
-        refreshEntity.setRefresh(refresh);
-        refreshEntity.setExpiration(date.toString());
+    private void addRefreshEntity(String email, String refresh) {
+        Date date = new Date(System.currentTimeMillis() + CustomLoginFilter.REFRESH_TOKEN_EXPIRE_TIME);
+        RefreshEntity refreshEntity = RefreshEntity.builder()
+                .email(email)
+                .refresh(refresh)
+                .expiration(date.getTime())
+                .build();
         refreshRepository.save(refreshEntity);
     }
 
