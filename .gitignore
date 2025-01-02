@@ -278,3 +278,5 @@ results.bin
 
 # 결과 파일
 results.*
+
+node_modules/
