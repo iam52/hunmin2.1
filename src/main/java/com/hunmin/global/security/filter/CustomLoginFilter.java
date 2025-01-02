@@ -2,14 +2,13 @@ package com.hunmin.global.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hunmin.domain.member.dto.LoginResponse;
-import com.hunmin.domain.member.entity.MemberLevel;
 import com.hunmin.domain.member.entity.MemberRole;
+import com.hunmin.global.security.entity.CustomUserDetails;
 import com.hunmin.global.security.jwt.JWTUtil;
 import com.hunmin.global.security.entity.RefreshEntity;
 import com.hunmin.global.security.repository.RefreshRepository;
-import com.hunmin.global.util.CookieUtil;
+import com.hunmin.global.security.jwt.CookieUtil;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +24,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 
 // 로그인 요청 처리 클래스

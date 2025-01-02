@@ -10,6 +10,12 @@ public enum ErrorCode {
     MEMBER_CREATE_FAIL("회원 생성에 실패했습니다.", HttpStatus.BAD_REQUEST), // 400
     MEMBER_INVALID_INPUT("회원 정보가 올바르지 않습니다.", HttpStatus.BAD_REQUEST), // 400
 
+    // 토큰 관련
+    REFRESH_TOKEN_NOT_FOUND("리프레시 토큰이 존재하지 않습니다.", HttpStatus.BAD_REQUEST), // 400
+    REFRESH_TOKEN_EXPIRED("리프레시 토큰이 만료되었습니다.", HttpStatus.BAD_REQUEST), // 400
+    INVALID_REFRESH_TOKEN("유효하지 않은 리프레시 토큰입니다.", HttpStatus.BAD_REQUEST), // 400
+    REFRESH_TOKEN_NOT_IN_DATABASE("데이터베이스에 존재하지 않는 리프레시 토큰입니다.", HttpStatus.BAD_REQUEST), // 400
+
     // 게시글 관련
     BOARD_NOT_FOUND("게시글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND), // 404
     BOARD_ACCESS_DENIED("게시글 접근 권한이 없습니다.", HttpStatus.FORBIDDEN), // 403

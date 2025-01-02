@@ -1,7 +1,7 @@
 package com.hunmin.global.handler;
 
 import com.hunmin.domain.chatmessage.dto.ChatMessageDTO;
-import com.hunmin.global.security.filter.CustomUserDetails;
+import com.hunmin.global.security.entity.CustomUserDetails;
 import com.hunmin.domain.member.entity.Member;
 import com.hunmin.global.security.jwt.JWTUtil;
 import com.hunmin.domain.member.repository.MemberRepository;

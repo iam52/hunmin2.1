@@ -4,13 +4,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 // refresh 토큰 저장을 위한 엔티티
 @Entity
 @Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "refresh_tokens")
 public class RefreshEntity {
     @Id
@@ -18,6 +19,5 @@ public class RefreshEntity {
     private String email;
 
     private String refresh;
-    private String expiration;
-
+    private Long expiration;
 }

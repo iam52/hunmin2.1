@@ -7,7 +7,7 @@ import com.hunmin.global.security.jwt.JWTUtil;
 import com.hunmin.global.security.filter.CustomLoginFilter;
 import com.hunmin.global.security.repository.RefreshRepository;
 import com.hunmin.domain.member.service.MemberService;
-import com.hunmin.global.util.CookieUtil;
+import com.hunmin.global.security.jwt.CookieUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
