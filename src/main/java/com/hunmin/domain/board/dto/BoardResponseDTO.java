@@ -4,16 +4,18 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import com.hunmin.domain.comment.dto.CommentResponseDTO;
 import com.hunmin.domain.board.entity.Board;
+import com.hunmin.domain.comment.dto.CommentResponseDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -25,9 +27,9 @@ public class BoardResponseDTO {
     private String nickname;
     private String profileImage;
     private String content;
-    private String location;
-    private Double latitude;
-    private Double longitude;
+    private String address;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
     private List<String> imageUrls;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -47,7 +49,7 @@ public class BoardResponseDTO {
         this.nickname = board.getNickname();
         this.profileImage = board.getMember().getImage();
         this.content = board.getContent();
-        this.location = board.getLocation();
+        this.address = board.getAddress();
         this.latitude = board.getLatitude();
         this.longitude = board.getLongitude();
         this.imageUrls = board.getImageUrls();
