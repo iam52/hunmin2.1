@@ -1,18 +1,17 @@
 package com.hunmin.domain.board.entity;
 
-import com.hunmin.global.common.BaseTimeEntity;
 import com.hunmin.domain.comment.entity.Comment;
 import com.hunmin.domain.member.entity.Member;
+import com.hunmin.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Getter
@@ -35,40 +34,36 @@ public class Board extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    private String location;
+    private String address;
 
-    private Double latitude;
+    @Column(precision = 10, scale = 8)
+    private BigDecimal latitude;
 
-    private Double longitude;
+    @Column(precision = 11, scale = 8)
+    private BigDecimal longitude;
 
     @Builder.Default
     @ElementCollection
     @CollectionTable(name = "board_image_urls", joinColumns = @JoinColumn(name = "board_id"))
     @Column(name = "image_urls", columnDefinition = "TEXT", nullable = false)
-    @Size(max = 10)
+    @Size(max = 5)
     private List<String> imageUrls = new ArrayList<>();
 
     @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 100)
     private final List<Comment> comments = new ArrayList<>();
 
-    public void changeTitle(@NotBlank String title) {
-        this.title = Objects.requireNonNull(title, "제목은 필수입니다.");
+    public void changeTitle(String title) {
+        this.title = title;
     }
 
     public void changeContent(String content) {
         this.content = content;
     }
 
-    public void changeLocation(String location) {
-        this.location = location;
-    }
-
-    public void changeLatitude(Double latitude) {
+    public void changeLocation(String address, BigDecimal latitude, BigDecimal longitude) {
+        this.address = address;
         this.latitude = latitude;
-    }
-
-    public void changeLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
@@ -80,21 +75,11 @@ public class Board extends BaseTimeEntity {
         return this.member.getNickname();
     }
 
-    public void addImageUrl(String url) {
-        this.imageUrls.add(url);
-    }
-
     public List<String> getImageUrls() {
         return Collections.unmodifiableList(imageUrls);
     }
 
     public List<Comment> getComments() {
         return Collections.unmodifiableList(comments);
-    }
-
-    public List<Comment> getComments(int page, int size) {
-        int fromIndex = page * size;
-        int toIndex = Math.min(fromIndex + size, comments.size());
-        return new ArrayList<>(comments.subList(fromIndex, toIndex));
     }
 }

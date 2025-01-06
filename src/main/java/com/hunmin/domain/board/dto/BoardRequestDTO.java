@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -26,8 +27,8 @@ public class BoardRequestDTO {
     @NotEmpty
     private String content;
 
-    private String location;
-    private Double latitude;
-    private Double longitude;
+    private String address;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
     private List<String> imageUrls;
 }

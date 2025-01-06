@@ -3,21 +3,21 @@ package com.hunmin.domain.board.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hunmin.domain.board.dto.BoardRequestDTO;
 import com.hunmin.domain.board.dto.BoardResponseDTO;
-import com.hunmin.global.common.PageRequestDTO;
 import com.hunmin.domain.board.entity.Board;
-import com.hunmin.domain.member.entity.Member;
 import com.hunmin.domain.board.repository.BoardRepository;
+import com.hunmin.domain.member.entity.Member;
 import com.hunmin.domain.member.repository.MemberRepository;
+import com.hunmin.global.common.PageRequestDTO;
 import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.HashOperations;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,7 +108,7 @@ public class BoardService {
                     .member(member)
                     .title(boardRequestDTO.getTitle())
                     .content(boardRequestDTO.getContent())
-                    .location(boardRequestDTO.getLocation())
+                    .address(boardRequestDTO.getAddress())
                     .latitude(boardRequestDTO.getLatitude())
                     .longitude(boardRequestDTO.getLongitude())
                     .imageUrls(boardRequestDTO.getImageUrls() != null ? boardRequestDTO.getImageUrls() : new ArrayList<>())
@@ -168,9 +168,7 @@ public class BoardService {
 
             board.changeTitle(boardRequestDTO.getTitle());
             board.changeContent(boardRequestDTO.getContent());
-            board.changeLocation(boardRequestDTO.getLocation());
-            board.changeLatitude(boardRequestDTO.getLatitude());
-            board.changeLongitude(boardRequestDTO.getLongitude());
+            board.changeLocation(boardRequestDTO.getAddress(), boardRequestDTO.getLatitude(), boardRequestDTO.getLongitude());
 
             boardRepository.save(board);
 
@@ -205,7 +203,7 @@ public class BoardService {
     //게시글 목록 조회
     public Page<BoardResponseDTO> readBoardList(PageRequestDTO pageRequestDTO) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(pageRequestDTO.getPage()-1, 10, sort);
+        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, 10, sort);
 
         List<BoardResponseDTO> boardResponseDTOs = new ArrayList<>();
 
@@ -277,13 +275,13 @@ public class BoardService {
     }
 
     public Page<Board> searchBoardByTitle(String title, Pageable pageable) {
-        if(title == null) title = "";
+        if (title == null) title = "";
         log.info("title321: {}", title);
         try {
             Sort sort = Sort.by(Sort.Direction.DESC, "title");
             log.info("pageable: {}", pageable.toString());
-        return boardRepository.findByTitleContaining(title, pageable);
-        }catch (Exception e) {
+            return boardRepository.findByTitleContaining(title, pageable);
+        } catch (Exception e) {
             log.error(e.getMessage());
             throw ErrorCode.BOARD_NOT_FOUND.throwException();
         }
