@@ -1,6 +1,7 @@
 package com.hunmin.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hunmin.domain.board.dto.BoardResponseDTO;
 import com.hunmin.global.pubsub.RedisSubscriber;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,21 +25,24 @@ public class RedisConfig {
 
         return new ChannelTopic("chatRoom");
     }
+
     //클라이언트로 부터 메세지 수신
     @Bean
     public RedisMessageListenerContainer redisMessageListener(RedisConnectionFactory connectionFactory
-                                                            ,MessageListenerAdapter listenerAdapter,
+            , MessageListenerAdapter listenerAdapter,
                                                               ChannelTopic channelTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.addMessageListener(listenerAdapter, channelTopic);
         return container;
     }
+
     //클라이언트로 부터 메세지 수신
     @Bean
     public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");
     }
+
     @Bean(name = "redisTemplate")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
@@ -62,6 +66,12 @@ public class RedisConfig {
 
     @Bean(name = "roomStorage")
     public HashOperations<String, String, Object> hashOperations(RedisTemplate<String, Object> redisTemplate) {
+        return redisTemplate.opsForHash();
+    }
+
+    // Board 서비스용 HashOperations Bean 추가
+    @Bean(name = "boardStorage")
+    public HashOperations<String, String, BoardResponseDTO> boardHashOperations(RedisTemplate<String, Object> redisTemplate) {
         return redisTemplate.opsForHash();
     }
 }

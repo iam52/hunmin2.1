@@ -9,12 +9,10 @@ import com.hunmin.domain.member.entity.Member;
 import com.hunmin.domain.member.repository.MemberRepository;
 import com.hunmin.global.common.PageRequestDTO;
 import com.hunmin.global.exception.ErrorCode;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.*;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,39 +22,34 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 @Slf4j
 public class BoardService {
     private final MemberRepository memberRepository;
     private final BoardRepository boardRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
+    @Qualifier("boardStorage")
     private final HashOperations<String, String, BoardResponseDTO> hashOps;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    public BoardService(MemberRepository memberRepository, BoardRepository boardRepository,
-                        RedisTemplate<String, Object> redisTemplate) {
+    public BoardService(MemberRepository memberRepository, BoardRepository boardRepository, ObjectMapper objectMapper,
+                        HashOperations<String, String, BoardResponseDTO> hashOps) {
         this.memberRepository = memberRepository;
         this.boardRepository = boardRepository;
-        this.redisTemplate = redisTemplate;
-        this.hashOps = redisTemplate.opsForHash();
+        this.objectMapper = objectMapper;
+        this.hashOps = hashOps;
     }
 
     // Redis에 저장된 BoardResponseDTO 읽기
-    public BoardResponseDTO readBoardFromRedis(String boardId) {
+    public Optional<BoardResponseDTO> readBoardFromRedis(String boardId) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> boardData = (Map<String, Object>) hashOps.get("board", boardId);
-            return objectMapper.convertValue(boardData, BoardResponseDTO.class);
+            BoardResponseDTO boardData = hashOps.get(boardId, "board");
+            return Optional.ofNullable(boardData).map(data -> objectMapper.convertValue(data, BoardResponseDTO.class));
         } catch (Exception e) {
-            log.error("Error reading board from Redis: ", e);
-            return null;
+            log.error("Error reading board from Redis: {}", boardId, e);
+            return Optional.empty();
         }
     }
 
@@ -113,11 +106,9 @@ public class BoardService {
                     .imageUrls(boardRequestDTO.getImageUrls() != null ? boardRequestDTO.getImageUrls() : new ArrayList<>())
                     .build();
 
-            boardRepository.save(board);
-
-            hashOps.put("board", String.valueOf(board.getBoardId()), new BoardResponseDTO(board));
-
-            return new BoardResponseDTO(board);
+            BoardResponseDTO boardResponseDTO = new BoardResponseDTO(board);
+            hashOps.put("board", String.valueOf(board.getBoardId()), boardResponseDTO);
+            return boardResponseDTO;
         } catch (Exception e) {
             log.error(String.valueOf(e));
             throw ErrorCode.BOARD_CREATE_FAIL.throwException();
@@ -126,16 +117,16 @@ public class BoardService {
 
     // 게시글 조회
     public BoardResponseDTO readBoard(Long boardId) {
-        BoardResponseDTO cachedBoard = readBoardFromRedis(String.valueOf(boardId));
-        if (cachedBoard != null) {
-            return cachedBoard;
+        // redis 캐시에서 먼저 조회 
+        Optional<BoardResponseDTO> cachedBoard = readBoardFromRedis(String.valueOf(boardId));
+        // 캐시에 게시글이 있으면 바로 반환
+        if (cachedBoard.isPresent()) {
+            return cachedBoard.get();
         }
 
         Board board = boardRepository.findCommentsByBoardId(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
         BoardResponseDTO boardResponseDTO = new BoardResponseDTO(board);
-
         hashOps.put("board", String.valueOf(boardId), boardResponseDTO);
-
         return boardResponseDTO;
     }
 
@@ -171,7 +162,8 @@ public class BoardService {
 
             boardRepository.save(board);
 
-            hashOps.put("board", String.valueOf(board.getBoardId()), new BoardResponseDTO(board));
+            BoardResponseDTO boardResponseDTO = new BoardResponseDTO(board);
+            hashOps.put("board", String.valueOf(board.getBoardId()), boardResponseDTO);
 
             return new BoardResponseDTO(board);
         } catch (Exception e) {
@@ -183,15 +175,12 @@ public class BoardService {
     // 게시글 삭제
     public BoardResponseDTO deleteBoard(Long boardId) {
         Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
-
         try {
             for (String imageUrl : board.getImageUrls()) {
                 deleteImage(imageUrl);
             }
-
             boardRepository.delete(board);
             hashOps.delete("board", String.valueOf(boardId));
-
             return new BoardResponseDTO(board);
         } catch (Exception e) {
             log.error(String.valueOf(e));
@@ -206,12 +195,12 @@ public class BoardService {
 
         List<BoardResponseDTO> boardResponseDTOs = new ArrayList<>();
 
-        for (Object boardIdObj : redisTemplate.opsForHash().keys("board")) {
-            if (boardIdObj instanceof String boardId) {
-                BoardResponseDTO cachedBoard = readBoardFromRedis(boardId);
-                if (cachedBoard != null) {
-                    boardResponseDTOs.add(cachedBoard);
-                }
+        // Redis에서 모든 게시글 조회
+        Map<String, BoardResponseDTO> entries = hashOps.entries("board");
+        if (entries != null) {
+            for (Map.Entry<String, BoardResponseDTO> entry : entries.entrySet()) {
+                Optional<BoardResponseDTO> cachedBoard = readBoardFromRedis(entry.getKey());
+                cachedBoard.ifPresent(boardResponseDTOs::add);
             }
         }
 
@@ -243,15 +232,16 @@ public class BoardService {
 
         List<BoardResponseDTO> boardResponseDTOs = new ArrayList<>();
 
-        for (Object boardIdObj : redisTemplate.opsForHash().keys("board")) {
-            if (boardIdObj instanceof String boardId) {
-                BoardResponseDTO cachedBoard = readBoardFromRedis(boardId);
-                if (cachedBoard != null && cachedBoard.getMemberId().equals(memberId)) {
-                    boardResponseDTOs.add(cachedBoard);
-                }
-            }
+        // Redis의 모든 게시글 조회 후 memberId로 필터링
+        Map<String, BoardResponseDTO> entries = hashOps.entries("board");
+
+        if (!entries.isEmpty()) {
+            entries.values().stream()
+                    .filter(dto -> dto.getMemberId().equals(memberId))
+                    .forEach(boardResponseDTOs::add);
         }
 
+        // 캐시에 충분한 데이터가 없으면 DB에서 조회
         if (boardResponseDTOs.size() < pageable.getPageSize()) {
             Page<Board> boards = boardRepository.findByMemberId(memberId, pageable);
             List<BoardResponseDTO> newBoardResponseDTOs = boards.map(BoardResponseDTO::new).getContent();
@@ -264,6 +254,7 @@ public class BoardService {
             }
         }
 
+        // 정렬 및 페이징
         boardResponseDTOs.sort((b1, b2) -> b2.getCreatedAt().compareTo(b1.getCreatedAt()));
 
         int start = (int) pageable.getOffset();
