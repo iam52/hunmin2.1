@@ -10,7 +10,7 @@ import com.hunmin.domain.member.repository.MemberRepository;
 import com.hunmin.global.common.PageRequestDTO;
 import com.hunmin.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.redis.core.HashOperations;
@@ -32,7 +32,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@Log4j2
+@Slf4j
 public class BoardService {
     private final MemberRepository memberRepository;
     private final BoardRepository boardRepository;
@@ -48,12 +48,11 @@ public class BoardService {
         this.hashOps = redisTemplate.opsForHash();
     }
 
-    //Redis에 저장된 BoardResponseDTO 읽기
+    // Redis에 저장된 BoardResponseDTO 읽기
     public BoardResponseDTO readBoardFromRedis(String boardId) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> boardData = (Map<String, Object>) hashOps.get("board", boardId);
-
             return objectMapper.convertValue(boardData, BoardResponseDTO.class);
         } catch (Exception e) {
             log.error("Error reading board from Redis: ", e);
@@ -61,7 +60,7 @@ public class BoardService {
         }
     }
 
-    //게시글 이미지 첨부
+    // 게시글 이미지 첨부
     public String uploadImage(MultipartFile file) throws IOException {
         String uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString();
         File directory = new File(uploadDir);
@@ -80,7 +79,7 @@ public class BoardService {
         return "/uploads/" + fileName;
     }
 
-    //파일 확장자 추출
+    // 파일 확장자 추출
     private String getFileExtension(String fileName) {
         if (fileName == null || !fileName.contains(".")) {
             throw new IllegalArgumentException("Invalid file name: " + fileName);
@@ -89,7 +88,7 @@ public class BoardService {
         return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
 
-    //게시글 이미지 삭제
+    // 게시글 이미지 삭제
     public void deleteImage(String imageUrl) throws IOException {
         String uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString();
         String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
@@ -98,7 +97,7 @@ public class BoardService {
         Files.deleteIfExists(filePath);
     }
 
-    //게시글 등록
+    // 게시글 등록
     public BoardResponseDTO createBoard(BoardRequestDTO boardRequestDTO) {
         try {
             Member member = memberRepository.findById(boardRequestDTO.getMemberId())
@@ -120,12 +119,12 @@ public class BoardService {
 
             return new BoardResponseDTO(board);
         } catch (Exception e) {
-            log.error(e);
+            log.error(String.valueOf(e));
             throw ErrorCode.BOARD_CREATE_FAIL.throwException();
         }
     }
 
-    //게시글 조회
+    // 게시글 조회
     public BoardResponseDTO readBoard(Long boardId) {
         BoardResponseDTO cachedBoard = readBoardFromRedis(String.valueOf(boardId));
         if (cachedBoard != null) {
@@ -140,7 +139,7 @@ public class BoardService {
         return boardResponseDTO;
     }
 
-    //게시글 수정
+    // 게시글 수정
     public BoardResponseDTO updateBoard(Long boardId, BoardRequestDTO boardRequestDTO) {
         Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
 
@@ -176,12 +175,12 @@ public class BoardService {
 
             return new BoardResponseDTO(board);
         } catch (Exception e) {
-            log.error(e);
+            log.error(String.valueOf(e));
             throw ErrorCode.BOARD_UPDATE_FAIL.throwException();
         }
     }
 
-    //게시글 삭제
+    // 게시글 삭제
     public BoardResponseDTO deleteBoard(Long boardId) {
         Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
 
@@ -195,12 +194,12 @@ public class BoardService {
 
             return new BoardResponseDTO(board);
         } catch (Exception e) {
-            log.error(e);
+            log.error(String.valueOf(e));
             throw ErrorCode.BOARD_DELETE_FAIL.throwException();
         }
     }
 
-    //게시글 목록 조회
+    // 게시글 목록 조회
     public Page<BoardResponseDTO> readBoardList(PageRequestDTO pageRequestDTO) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, 10, sort);
@@ -237,7 +236,7 @@ public class BoardService {
         return new PageImpl<>(pagedResponse, pageable, boardResponseDTOs.size());
     }
 
-    //회원 별 작성글 목록 조회
+    // 회원 별 작성글 목록 조회
     public Page<BoardResponseDTO> readBoardListByMember(Long memberId, PageRequestDTO pageRequestDTO) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = pageRequestDTO.getPageable(sort);
