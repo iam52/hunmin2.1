@@ -99,7 +99,19 @@ public enum ErrorCode {
     WORD_CREATE_FAIL("단어 생성에 실패했습니다.", HttpStatus.BAD_REQUEST), // 400
     WORD_UPDATE_FAIL("단어 수정에 실패했습니다.", HttpStatus.BAD_REQUEST), // 400
     WORD_DELETE_FAIL("단어 삭제에 실패했습니다.", HttpStatus.BAD_REQUEST), // 400
-    WORD_INVALID_INPUT("단어 정보가 올바르지 않습니다.", HttpStatus.BAD_REQUEST); // 400
+    WORD_INVALID_INPUT("단어 정보가 올바르지 않습니다.", HttpStatus.BAD_REQUEST), // 400
+
+    // 이미지 관련
+    IMAGE_EMPTY_FILE("파일이 비어있습니다.", HttpStatus.BAD_REQUEST), // 400
+    IMAGE_FILE_TOO_LARGE("파일 크기가 3MB를 초과합니다.", HttpStatus.BAD_REQUEST), // 400
+    IMAGE_INVALID_FILE_NAME("잘못된 파일 이름입니다.", HttpStatus.BAD_REQUEST), // 400
+    IMAGE_NOT_EXISTS_FILE_EXTENSION("파일 확장자가 존재하지 않습니다.", HttpStatus.BAD_REQUEST), // 400
+    IMAGE_NOT_SUPPORT_FILE_EXTENSION("지원하지 않는 파일 확장자입니다.", HttpStatus.BAD_REQUEST), // 400
+    IMAGE_INVALID_FILE_TYPE("유효하지 않은 파일 타입입니다.", HttpStatus.BAD_REQUEST), // 400
+    IMAGE_FILE_UPLOAD_FAIL("파일 업로드에 실패했습니다.", HttpStatus.BAD_REQUEST), // 400
+    IMAGE_FILE_DELETE_FAIL("파일 삭제에 실패했습니다.", HttpStatus.BAD_REQUEST), // 400
+    IMAGE_NOT_FOUND("이미지를 찾을 수 없습니다.", HttpStatus.NOT_FOUND), // 404
+    IMAGE_PROCESS_FAIL("이미지 처리에 실패했습니다.", HttpStatus.BAD_REQUEST); // 400
 
     private final String message;
     private final HttpStatus status;
