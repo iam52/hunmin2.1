@@ -132,12 +132,10 @@ public class MemberService {
         }
         return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
-
+    
+    // ChatMessage에서 사용자 확인
     public MemberRequest readUserInfo(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
-        if (member == null) {
-            throw new CustomException((ErrorCode.MEMBER_NOT_FOUND));
-        }
         return new MemberRequest(member);
     }
 }

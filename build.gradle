@@ -52,7 +52,7 @@ dependencies {
     implementation 'org.webjars:sockjs-client:1.1.2'
     implementation 'org.webjars:stomp-websocket:2.3.3-1'
 
-    //jpaQuesydsl 의존성
+    // jpaQuesydsl 의존성
     implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 
     annotationProcessor (
@@ -60,11 +60,16 @@ dependencies {
             'jakarta.annotation:jakarta.annotation-api',
             'com.querydsl:querydsl-apt:5.1.0:jakarta',
     )
-    //test
+    
+    // aws 의존성
+    implementation "io.awspring.cloud:spring-cloud-aws-dependencies:3.2.1" // BOM
+    implementation 'io.awspring.cloud:spring-cloud-aws-core:3.2.1' // aws core: credential 사용
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.2.1' // s3 서비스 스타터
+
+    // test
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
-
 }
 
 
