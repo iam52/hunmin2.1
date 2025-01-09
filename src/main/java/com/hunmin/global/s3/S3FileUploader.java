@@ -14,7 +14,6 @@ import java.io.IOException;
 @Component
 public class S3FileUploader {
     private final String bucket;
-    private final String region;
     private final S3Client s3Client;
     private final String baseUrl;
 
@@ -24,7 +23,6 @@ public class S3FileUploader {
             S3Client s3Client
     ) {
         this.bucket = bucket;
-        this.region = region;
         this.s3Client = s3Client;
         this.baseUrl = String.format("https://%s.s3.%s.amazonaws.com", bucket, region);
     }

@@ -87,15 +87,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/members/reissue").permitAll()
                         .requestMatchers("/api/members/admin").hasRole("ADMIN")
                         .requestMatchers("/api/members/password/**").permitAll()
-                        .requestMatchers("/webjars/**", "/images/**", "/favicon.ico").permitAll()//웹 자원 경로 허용
-                        .requestMatchers("/api/notification/**").permitAll() //알림 실시간 반영 위한 수정
-                        .requestMatchers("/api/board/uploadImage/**").permitAll() //게시글 작성 이미지
+                        .requestMatchers("/webjars/**", "/images/**", "/favicon.ico").permitAll() // 웹 자원 경로 허용
+                        .requestMatchers("/api/notification/**").permitAll() // 알림 실시간 반영 위한 수정
+                        .requestMatchers("/api/board/uploadImage/**").permitAll() // 게시글 작성 이미지
                         .requestMatchers("uploads/**").permitAll()
-                        .requestMatchers("api/members/uploads/**").permitAll() //프로필 이미지
+                        .requestMatchers("api/members/uploads/**").permitAll() // 프로필 이미지
                         .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll() //swagger
-                        .requestMatchers("/swagger-ui.html").permitAll() // 추가
-                        .requestMatchers("/api/notices/list/**").permitAll() // 추가
+                        .requestMatchers("/v3/api-docs/**").permitAll() // swagger
+                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/api/notices/list/**").permitAll()
                         .anyRequest().permitAll())
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class)

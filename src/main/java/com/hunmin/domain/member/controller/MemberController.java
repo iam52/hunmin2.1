@@ -1,14 +1,13 @@
 package com.hunmin.domain.member.controller;
 
-import com.hunmin.domain.member.dto.MemberRequest;
-import com.hunmin.domain.member.dto.MemberResponse;
-import com.hunmin.domain.member.dto.PasswordFindRequest;
-import com.hunmin.domain.member.dto.PasswordUpdateRequest;
+import com.hunmin.domain.member.dto.*;
 import com.hunmin.domain.member.service.MemberService;
 import com.hunmin.global.exception.ErrorCode;
 import com.hunmin.global.security.dto.TokenResponse;
+import com.hunmin.global.security.entity.CustomUserDetails;
 import com.hunmin.global.security.jwt.CookieUtil;
 import com.hunmin.global.security.service.TokenService;
+import com.sun.security.auth.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
@@ -18,9 +17,12 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -47,13 +49,11 @@ public class MemberController {
 
     @PostMapping("/uploads")
     @Operation(summary = "프로필 사진 등록", description = "회원 가입 시 프로필 사진을 등록할 때 사용하는 API")
-    public ResponseEntity<String> uploadImage(@RequestParam("image") MultipartFile image) {
-        try {
-            String imageUrl = memberService.uploadImage(image);
-            return ResponseEntity.ok(imageUrl);  // 이미지 URL 반환
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 업로드 실패");
-        }
+    public ResponseEntity<MemberImageResponse> uploadImage(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestParam("image") MultipartFile image) throws IOException {
+        MemberImageResponse memberImageResponse = memberService.uploadProfileImage(customUserDetails.getMemberId(), image);
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberImageResponse);
     }
 
     @GetMapping("/{nickname}")

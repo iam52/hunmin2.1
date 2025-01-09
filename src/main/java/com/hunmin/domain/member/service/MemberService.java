@@ -1,15 +1,13 @@
 package com.hunmin.domain.member.service;
 
-import com.hunmin.domain.member.dto.MemberRequest;
-import com.hunmin.domain.member.dto.MemberResponse;
-import com.hunmin.domain.member.dto.PasswordFindRequest;
-import com.hunmin.domain.member.dto.PasswordUpdateRequest;
+import com.hunmin.domain.member.dto.*;
 import com.hunmin.domain.member.entity.Member;
 import com.hunmin.domain.member.entity.MemberLevel;
 import com.hunmin.domain.member.entity.MemberRole;
 import com.hunmin.domain.member.repository.MemberRepository;
 import com.hunmin.global.exception.CustomException;
 import com.hunmin.global.exception.ErrorCode;
+import com.hunmin.global.s3.S3FileUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -19,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,6 +34,7 @@ import java.util.UUID;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final S3FileUploader s3FileUploader;
 
     // 회원 가입
     public MemberResponse register(MemberRequest memberRequest) {
@@ -110,29 +111,24 @@ public class MemberService {
     }
 
     // 이미지 업로드
-    public String uploadImage(MultipartFile file) throws IOException {
-        String uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString();
-        File directory = new File(uploadDir);
-        if (!directory.exists()) {
-            boolean created = directory.mkdirs();
-            if (!created) {
-                throw new IOException("Failed to create directory");
-            }
+    public MemberImageResponse uploadProfileImage(Long memberId, MultipartFile multipartFile) throws IOException {
+        Member member = memberRepository.findById(memberId).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+        if (member.getImage() != null) {
+            s3FileUploader.delete(member.getImage());
         }
-        String fileName = UUID.randomUUID() + "." + getFileExtension(file.getOriginalFilename());
-        Path filePath = Paths.get(uploadDir, fileName);
-        Files.copy(file.getInputStream(), filePath);
-        return "/uploads/" + fileName;
+        BufferedImage bufferedImage = ImageIO.read(multipartFile.getInputStream());
+
+        String profileImageUrl = s3FileUploader.uploadImage(multipartFile);
+        member.updateImage(profileImageUrl);
+
+        return new MemberImageResponse(
+                member.getMemberId(),
+                profileImageUrl,
+                bufferedImage.getWidth(),
+                bufferedImage.getHeight()
+        );
     }
 
-    // 파일 확장자 추출
-    private String getFileExtension(String fileName) {
-        if (fileName == null || !fileName.contains(".")) {
-            throw new IllegalArgumentException("Invalid file name: " + fileName);
-        }
-        return fileName.substring(fileName.lastIndexOf('.') + 1);
-    }
-    
     // ChatMessage에서 사용자 확인
     public MemberRequest readUserInfo(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
