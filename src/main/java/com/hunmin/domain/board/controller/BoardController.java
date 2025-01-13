@@ -38,14 +38,14 @@ public class BoardController {
     @PostMapping
     @Operation(summary = "게시글 등록", description = "게시글을 등록할 때 사용하는 API")
     public ResponseEntity<BoardResponseDTO> createBoard(@RequestBody BoardRequestDTO boardRequestDTO) {
-        return ResponseEntity.ok(boardService.createBoard(boardRequestDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(boardService.createBoard(boardRequestDTO));
     }
 
     //게시글 조회
     @GetMapping("/{boardId}")
     @Operation(summary = "게시글 조회", description = "게시글을 조회할 때 사용하는 API")
     public ResponseEntity<BoardResponseDTO> readBoard(@PathVariable Long boardId) {
-        return ResponseEntity.ok(boardService.readBoard(boardId));
+        return ResponseEntity.status(HttpStatus.OK).body(boardService.readBoard(boardId));
     }
 
     //게시글 목록 조회
@@ -54,7 +54,7 @@ public class BoardController {
     public ResponseEntity<Page<BoardResponseDTO>> readBoardList(@RequestParam(value = "page", defaultValue = "1") int page,
                                                                 @RequestParam(value = "size", defaultValue = "5") int size) {
         PageRequestDTO pageRequestDTO = PageRequestDTO.builder().page(page).size(size).build();
-        return ResponseEntity.ok(boardService.readBoardList(pageRequestDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(boardService.readBoardList(pageRequestDTO));
     }
 
     //회원 별 게시글 목록 조회
@@ -64,7 +64,7 @@ public class BoardController {
                                                                 @RequestParam(value = "page", defaultValue = "1") int page,
                                                                 @RequestParam(value = "size", defaultValue = "10") int size) {
         PageRequestDTO pageRequestDTO = PageRequestDTO.builder().page(page).size(size).build();
-        return ResponseEntity.ok(boardService.readBoardListByMember(memberId, pageRequestDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(boardService.readBoardListByMember(memberId, pageRequestDTO));
     }
 
     //게시글 수정
@@ -77,7 +77,7 @@ public class BoardController {
         if (!id.equals(boardRequestDTO.getMemberId())) {
             throw ErrorCode.BOARD_UPDATE_FAIL.throwException();
         }
-        return ResponseEntity.ok(boardService.updateBoard(boardId, boardRequestDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(boardService.updateBoard(boardId, boardRequestDTO));
     }
 
     //게시글 삭제
@@ -89,7 +89,7 @@ public class BoardController {
             throw ErrorCode.BOARD_DELETE_FAIL.throwException();
         }
         boardService.deleteBoard(boardId);
-        return ResponseEntity.ok(Map.of("result", "success"));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     //게시글 이미지 첨부

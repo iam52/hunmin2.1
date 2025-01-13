@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -54,29 +55,28 @@ public class BoardService {
 
     // 게시글 등록
     public BoardResponseDTO createBoard(BoardRequestDTO boardRequestDTO) {
+        Member member = memberRepository.findById(boardRequestDTO.getMemberId())
+                .orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
+
+        Board board = Board.builder()
+                .member(member)
+                .title(boardRequestDTO.getTitle())
+                .content(boardRequestDTO.getContent())
+                .address(boardRequestDTO.getAddress())
+                .latitude(boardRequestDTO.getLatitude())
+                .longitude(boardRequestDTO.getLongitude())
+                .imageUrls(boardRequestDTO.getImageUrls() != null ? boardRequestDTO.getImageUrls() : new ArrayList<>())
+                .build();
+
+        boardRepository.save(board);
+
         try {
-            Member member = memberRepository.findById(boardRequestDTO.getMemberId())
-                    .orElseThrow(ErrorCode.MEMBER_NOT_FOUND::throwException);
-
-            Board board = Board.builder()
-                    .member(member)
-                    .title(boardRequestDTO.getTitle())
-                    .content(boardRequestDTO.getContent())
-                    .address(boardRequestDTO.getAddress())
-                    .latitude(boardRequestDTO.getLatitude())
-                    .longitude(boardRequestDTO.getLongitude())
-                    .imageUrls(boardRequestDTO.getImageUrls() != null ? boardRequestDTO.getImageUrls() : new ArrayList<>())
-                    .build();
-
-            boardRepository.save(board);
-
             hashOps.put("board", String.valueOf(board.getBoardId()), new BoardResponseDTO(board));
-
-            return new BoardResponseDTO(board);
-        } catch (Exception e) {
-            log.error(String.valueOf(e));
-            throw ErrorCode.BOARD_CREATE_FAIL.throwException();
+        } catch (RedisConnectionFailureException e) {
+            log.warn("=== Failed to cache board: {}", e.getMessage());
         }
+
+        return new BoardResponseDTO(board);
     }
 
     // 게시글 조회
