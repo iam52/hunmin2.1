@@ -9,7 +9,6 @@ import com.hunmin.domain.board.repository.BoardRepository;
 import com.hunmin.domain.member.entity.Member;
 import com.hunmin.domain.member.repository.MemberRepository;
 import com.hunmin.global.common.PageRequestDTO;
-import com.hunmin.global.exception.CustomException;
 import com.hunmin.global.exception.ErrorCode;
 import com.hunmin.global.s3.S3FileUploader;
 import lombok.RequiredArgsConstructor;
@@ -53,68 +52,6 @@ public class BoardService {
         this.s3FileUploader = s3FileUploader;
     }
 
-    // Redis에 저장된 BoardResponseDTO 읽기
-    public BoardResponseDTO readBoardFromRedis(String boardId) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> boardData = (Map<String, Object>) hashOps.get("board", boardId);
-            return objectMapper.convertValue(boardData, BoardResponseDTO.class);
-        } catch (Exception e) {
-            log.error("Error reading board from Redis: ", e);
-            return null;
-        }
-    }
-
-    // 게시글 이미지 첨부
-    public PostImageResponse uploadPostImage(Long boardId, List<MultipartFile> multipartFiles) throws IOException {
-        Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
-
-        if (multipartFiles.size() > 4) {
-            throw ErrorCode.IMAGE_FILE_TOO_MANY.throwException();
-        }
-
-        List<PostImageResponse.ImageInfo> imageInfos = new ArrayList<>();
-
-        List<String> boardImagesUrl = s3FileUploader.uploadImages(multipartFiles);
-
-        board.updateImgUrls(boardImagesUrl);
-
-        for (int i = 0; i < multipartFiles.size(); i++) {
-            BufferedImage bufferedImage = ImageIO.read(multipartFiles.get(i).getInputStream());
-
-            if (bufferedImage == null) {
-                throw ErrorCode.IMAGE_INVALID_FILE_TYPE.throwException();
-            }
-
-            imageInfos.add(
-                    new PostImageResponse.ImageInfo(
-                            boardImagesUrl.get(i),
-                            bufferedImage.getWidth(),
-                            bufferedImage.getHeight()
-                    ));
-        }
-
-        return new PostImageResponse(boardId, imageInfos);
-    }
-
-    // 파일 확장자 추출
-    private String getFileExtension(String fileName) {
-        if (fileName == null || !fileName.contains(".")) {
-            throw new IllegalArgumentException("Invalid file name: " + fileName);
-        }
-
-        return fileName.substring(fileName.lastIndexOf('.') + 1);
-    }
-
-    // 게시글 이미지 삭제
-    public void deleteImage(String imageUrl) throws IOException {
-        String uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString();
-        String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
-        Path filePath = Paths.get(uploadDir, fileName);
-
-        Files.deleteIfExists(filePath);
-    }
-
     // 게시글 등록
     public BoardResponseDTO createBoard(BoardRequestDTO boardRequestDTO) {
         try {
@@ -144,7 +81,9 @@ public class BoardService {
 
     // 게시글 조회
     public BoardResponseDTO readBoard(Long boardId) {
-        BoardResponseDTO cachedBoard = readBoardFromRedis(String.valueOf(boardId));
+        String cacheKey = String.format("board:%d", boardId);
+        BoardResponseDTO cachedBoard = readBoardFromRedis(cacheKey);
+
         if (cachedBoard != null) {
             return cachedBoard;
         }
@@ -155,66 +94,6 @@ public class BoardService {
         hashOps.put("board", String.valueOf(boardId), boardResponseDTO);
 
         return boardResponseDTO;
-    }
-
-    // 게시글 수정
-    public BoardResponseDTO updateBoard(Long boardId, BoardRequestDTO boardRequestDTO) {
-        Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
-
-        try {
-            List<String> existingImageUrls = new ArrayList<>(board.getImageUrls());
-
-            if (boardRequestDTO.getImageUrls() != null) {
-                List<String> newImageUrls = boardRequestDTO.getImageUrls();
-                List<String> urlsToDelete = new ArrayList<>();
-
-                for (String existingUrl : existingImageUrls) {
-                    if (!newImageUrls.contains(existingUrl)) {
-                        urlsToDelete.add(existingUrl);
-                    }
-                }
-
-                for (String url : urlsToDelete) {
-                    deleteImage(url);
-                    existingImageUrls.remove(url);
-                }
-
-                existingImageUrls.addAll(newImageUrls);
-                board.updateImgUrls(existingImageUrls);
-            }
-
-            board.updateTitle(boardRequestDTO.getTitle());
-            board.updateContent(boardRequestDTO.getContent());
-            board.updateLocation(boardRequestDTO.getAddress(), boardRequestDTO.getLatitude(), boardRequestDTO.getLongitude());
-
-            boardRepository.save(board);
-
-            hashOps.put("board", String.valueOf(board.getBoardId()), new BoardResponseDTO(board));
-
-            return new BoardResponseDTO(board);
-        } catch (Exception e) {
-            log.error(String.valueOf(e));
-            throw ErrorCode.BOARD_UPDATE_FAIL.throwException();
-        }
-    }
-
-    // 게시글 삭제
-    public BoardResponseDTO deleteBoard(Long boardId) {
-        Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
-
-        try {
-            for (String imageUrl : board.getImageUrls()) {
-                deleteImage(imageUrl);
-            }
-
-            boardRepository.delete(board);
-            hashOps.delete("board", String.valueOf(boardId));
-
-            return new BoardResponseDTO(board);
-        } catch (Exception e) {
-            log.error(String.valueOf(e));
-            throw ErrorCode.BOARD_DELETE_FAIL.throwException();
-        }
     }
 
     // 게시글 목록 조회
@@ -302,5 +181,127 @@ public class BoardService {
             log.error(e.getMessage());
             throw ErrorCode.BOARD_NOT_FOUND.throwException();
         }
+    }
+
+    // 게시글 수정
+    public BoardResponseDTO updateBoard(Long boardId, BoardRequestDTO boardRequestDTO) {
+        Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
+
+        try {
+            List<String> existingImageUrls = new ArrayList<>(board.getImageUrls());
+
+            if (boardRequestDTO.getImageUrls() != null) {
+                List<String> newImageUrls = boardRequestDTO.getImageUrls();
+                List<String> urlsToDelete = new ArrayList<>();
+
+                for (String existingUrl : existingImageUrls) {
+                    if (!newImageUrls.contains(existingUrl)) {
+                        urlsToDelete.add(existingUrl);
+                    }
+                }
+
+                for (String url : urlsToDelete) {
+                    deleteImage(url);
+                    existingImageUrls.remove(url);
+                }
+
+                existingImageUrls.addAll(newImageUrls);
+                board.updateImgUrls(existingImageUrls);
+            }
+
+            board.updateTitle(boardRequestDTO.getTitle());
+            board.updateContent(boardRequestDTO.getContent());
+            board.updateLocation(boardRequestDTO.getAddress(), boardRequestDTO.getLatitude(), boardRequestDTO.getLongitude());
+
+            boardRepository.save(board);
+
+            hashOps.put("board", String.valueOf(board.getBoardId()), new BoardResponseDTO(board));
+
+            return new BoardResponseDTO(board);
+        } catch (Exception e) {
+            log.error(String.valueOf(e));
+            throw ErrorCode.BOARD_UPDATE_FAIL.throwException();
+        }
+    }
+
+    // 게시글 삭제
+    public BoardResponseDTO deleteBoard(Long boardId) {
+        Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
+
+        try {
+            for (String imageUrl : board.getImageUrls()) {
+                deleteImage(imageUrl);
+            }
+
+            boardRepository.delete(board);
+            hashOps.delete("board", String.valueOf(boardId));
+
+            return new BoardResponseDTO(board);
+        } catch (Exception e) {
+            log.error(String.valueOf(e));
+            throw ErrorCode.BOARD_DELETE_FAIL.throwException();
+        }
+    }
+
+    // 게시글 이미지 첨부
+    public PostImageResponse uploadPostImage(Long boardId, List<MultipartFile> multipartFiles) throws IOException {
+        Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
+
+        if (multipartFiles.size() > 4) {
+            throw ErrorCode.IMAGE_FILE_TOO_MANY.throwException();
+        }
+
+        List<PostImageResponse.ImageInfo> imageInfos = new ArrayList<>();
+
+        List<String> boardImagesUrl = s3FileUploader.uploadImages(multipartFiles);
+
+        board.updateImgUrls(boardImagesUrl);
+
+        for (int i = 0; i < multipartFiles.size(); i++) {
+            BufferedImage bufferedImage = ImageIO.read(multipartFiles.get(i).getInputStream());
+
+            if (bufferedImage == null) {
+                throw ErrorCode.IMAGE_INVALID_FILE_TYPE.throwException();
+            }
+
+            imageInfos.add(
+                    new PostImageResponse.ImageInfo(
+                            boardImagesUrl.get(i),
+                            bufferedImage.getWidth(),
+                            bufferedImage.getHeight()
+                    ));
+        }
+
+        return new PostImageResponse(boardId, imageInfos);
+    }
+
+    // 게시글 이미지 삭제
+    public void deleteImage(String imageUrl) throws IOException {
+        String uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString();
+        String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+        Path filePath = Paths.get(uploadDir, fileName);
+
+        Files.deleteIfExists(filePath);
+    }
+
+    // Redis에 저장된 BoardResponseDTO 읽기
+    public BoardResponseDTO readBoardFromRedis(String boardId) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> boardData = (Map<String, Object>) hashOps.get("board", boardId);
+            return objectMapper.convertValue(boardData, BoardResponseDTO.class);
+        } catch (Exception e) {
+            log.error("Error reading board from Redis: ", e);
+            return null;
+        }
+    }
+
+    // 파일 확장자 추출
+    private String getFileExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            throw new IllegalArgumentException("Invalid file name: " + fileName);
+        }
+
+        return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
 }
