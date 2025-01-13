@@ -103,6 +103,7 @@ public enum ErrorCode {
 
     // 이미지 관련
     IMAGE_EMPTY_FILE("파일이 비어있습니다.", HttpStatus.BAD_REQUEST), // 400
+    IMAGE_FILE_TOO_MANY("이미지는 최대 3장까지 가능합니다.", HttpStatus.BAD_REQUEST), // 400
     IMAGE_FILE_TOO_LARGE("파일 크기가 3MB를 초과합니다.", HttpStatus.BAD_REQUEST), // 400
     IMAGE_INVALID_FILE_NAME("잘못된 파일 이름입니다.", HttpStatus.BAD_REQUEST), // 400
     IMAGE_NOT_EXISTS_FILE_EXTENSION("파일 확장자가 존재하지 않습니다.", HttpStatus.BAD_REQUEST), // 400

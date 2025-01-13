@@ -5,7 +5,6 @@ import com.hunmin.domain.member.entity.Member;
 import com.hunmin.domain.member.entity.MemberLevel;
 import com.hunmin.domain.member.entity.MemberRole;
 import com.hunmin.domain.member.repository.MemberRepository;
-import com.hunmin.global.exception.CustomException;
 import com.hunmin.global.exception.ErrorCode;
 import com.hunmin.global.s3.S3FileUploader;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

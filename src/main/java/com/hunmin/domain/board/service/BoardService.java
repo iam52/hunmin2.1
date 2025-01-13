@@ -3,12 +3,15 @@ package com.hunmin.domain.board.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hunmin.domain.board.dto.BoardRequestDTO;
 import com.hunmin.domain.board.dto.BoardResponseDTO;
+import com.hunmin.domain.board.dto.PostImageResponse;
 import com.hunmin.domain.board.entity.Board;
 import com.hunmin.domain.board.repository.BoardRepository;
 import com.hunmin.domain.member.entity.Member;
 import com.hunmin.domain.member.repository.MemberRepository;
 import com.hunmin.global.common.PageRequestDTO;
+import com.hunmin.global.exception.CustomException;
 import com.hunmin.global.exception.ErrorCode;
+import com.hunmin.global.s3.S3FileUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +31,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -38,14 +41,16 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final HashOperations<String, String, BoardResponseDTO> hashOps;
+    private final S3FileUploader s3FileUploader;
 
     @Autowired
     public BoardService(MemberRepository memberRepository, BoardRepository boardRepository,
-                        RedisTemplate<String, Object> redisTemplate) {
+                        RedisTemplate<String, Object> redisTemplate, S3FileUploader s3FileUploader) {
         this.memberRepository = memberRepository;
         this.boardRepository = boardRepository;
         this.redisTemplate = redisTemplate;
         this.hashOps = redisTemplate.opsForHash();
+        this.s3FileUploader = s3FileUploader;
     }
 
     // Redis에 저장된 BoardResponseDTO 읽기
@@ -61,22 +66,35 @@ public class BoardService {
     }
 
     // 게시글 이미지 첨부
-    public String uploadImage(MultipartFile file) throws IOException {
-        String uploadDir = Paths.get("uploads").toAbsolutePath().normalize().toString();
-        File directory = new File(uploadDir);
+    public PostImageResponse uploadPostImage(Long boardId, List<MultipartFile> multipartFiles) throws IOException {
+        Board board = boardRepository.findById(boardId).orElseThrow(ErrorCode.BOARD_NOT_FOUND::throwException);
 
-        if (!directory.exists()) {
-            boolean created = directory.mkdirs();
-            if (!created) {
-                throw new IOException("Failed to create directory");
-            }
+        if (multipartFiles.size() > 4) {
+            throw ErrorCode.IMAGE_FILE_TOO_MANY.throwException();
         }
 
-        String fileName = UUID.randomUUID() + "." + getFileExtension(file.getOriginalFilename());
-        Path filePath = Paths.get(uploadDir, fileName);
-        Files.copy(file.getInputStream(), filePath);
+        List<PostImageResponse.ImageInfo> imageInfos = new ArrayList<>();
 
-        return "/uploads/" + fileName;
+        List<String> boardImagesUrl = s3FileUploader.uploadImages(multipartFiles);
+
+        board.updateImgUrls(boardImagesUrl);
+
+        for (int i = 0; i < multipartFiles.size(); i++) {
+            BufferedImage bufferedImage = ImageIO.read(multipartFiles.get(i).getInputStream());
+
+            if (bufferedImage == null) {
+                throw ErrorCode.IMAGE_INVALID_FILE_TYPE.throwException();
+            }
+
+            imageInfos.add(
+                    new PostImageResponse.ImageInfo(
+                            boardImagesUrl.get(i),
+                            bufferedImage.getWidth(),
+                            bufferedImage.getHeight()
+                    ));
+        }
+
+        return new PostImageResponse(boardId, imageInfos);
     }
 
     // 파일 확장자 추출
@@ -162,12 +180,12 @@ public class BoardService {
                 }
 
                 existingImageUrls.addAll(newImageUrls);
-                board.changeImgUrls(existingImageUrls);
+                board.updateImgUrls(existingImageUrls);
             }
 
-            board.changeTitle(boardRequestDTO.getTitle());
-            board.changeContent(boardRequestDTO.getContent());
-            board.changeLocation(boardRequestDTO.getAddress(), boardRequestDTO.getLatitude(), boardRequestDTO.getLongitude());
+            board.updateTitle(boardRequestDTO.getTitle());
+            board.updateContent(boardRequestDTO.getContent());
+            board.updateLocation(boardRequestDTO.getAddress(), boardRequestDTO.getLatitude(), boardRequestDTO.getLongitude());
 
             boardRepository.save(board);
 

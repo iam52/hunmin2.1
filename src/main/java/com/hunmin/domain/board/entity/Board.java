@@ -53,21 +53,21 @@ public class Board extends BaseTimeEntity {
     @BatchSize(size = 100)
     private final List<Comment> comments = new ArrayList<>();
 
-    public void changeTitle(String title) {
+    public void updateTitle(String title) {
         this.title = title;
     }
 
-    public void changeContent(String content) {
+    public void updateContent(String content) {
         this.content = content;
     }
 
-    public void changeLocation(String address, BigDecimal latitude, BigDecimal longitude) {
+    public void updateLocation(String address, BigDecimal latitude, BigDecimal longitude) {
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public void changeImgUrls(List<String> imageUrls) {
+    public void updateImgUrls(List<String> imageUrls) {
         this.imageUrls = new ArrayList<>(imageUrls);
     }
 

@@ -2,17 +2,25 @@ package com.hunmin.domain.board.controller;
 
 import com.hunmin.domain.board.dto.BoardRequestDTO;
 import com.hunmin.domain.board.dto.BoardResponseDTO;
+import com.hunmin.domain.board.dto.PostImageResponse;
 import com.hunmin.global.common.PageRequestDTO;
 import com.hunmin.domain.board.repository.BoardRepository;
 import com.hunmin.domain.member.repository.MemberRepository;
 import com.hunmin.domain.board.service.BoardService;
 import com.hunmin.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Log4j2
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/board")
@@ -34,19 +42,13 @@ public class BoardController {
     private final BoardRepository boardRepository;
 
     //게시글 이미지 첨부
-    @PostMapping("/uploadImage")
+    @PostMapping(value = "/uploadImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "게시글 이미지 등록", description = "게시글에 여러 이미지를 등록할 때 사용하는 API")
-    public ResponseEntity<List<String>> uploadImages(@RequestParam("files") MultipartFile[] files) {
-        List<String> imageUrls = new ArrayList<>();
-        try {
-            for (MultipartFile file : files) {
-                String imageUrl = boardService.uploadImage(file);
-                imageUrls.add(imageUrl);
-            }
-            return ResponseEntity.ok(imageUrls);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of("Image upload failed"));
-        }
+    public ResponseEntity<PostImageResponse> uploadImages(@RequestParam("boardId") Long boardId,
+                                                          @RequestPart("files") List<MultipartFile> multipartFiles
+    ) throws IOException {
+        PostImageResponse response = boardService.uploadPostImage(boardId, multipartFiles);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     //게시글 등록
@@ -66,7 +68,9 @@ public class BoardController {
     //게시글 수정
     @PutMapping("/{boardId}")
     @Operation(summary = "게시글 수정", description = "게시글을 수정할 때 사용하는 API")
-    public ResponseEntity<BoardResponseDTO> updateBoard(@PathVariable Long boardId, @RequestBody BoardRequestDTO boardRequestDTO, Authentication authentication) {
+    public ResponseEntity<BoardResponseDTO> updateBoard(@PathVariable Long boardId,
+                                                        @RequestBody BoardRequestDTO boardRequestDTO,
+                                                        Authentication authentication) {
         Long id = memberRepository.findByEmail(authentication.getName()).get().getMemberId();
         if (!id.equals(boardRequestDTO.getMemberId())) {
             throw ErrorCode.BOARD_UPDATE_FAIL.throwException();
@@ -104,14 +108,4 @@ public class BoardController {
         PageRequestDTO pageRequestDTO = PageRequestDTO.builder().page(page).size(size).build();
         return ResponseEntity.ok(boardService.readBoardListByMember(memberId, pageRequestDTO));
     }
-
-//    //검색별 게시글 조회
-//    @GetMapping("/search")
-//    @Operation(summary = "검색 별 작성글 목록", description = "검색별 작성글 목록을 조회할 때 사용하는 API")
-//    public ResponseEntity<Page<BoardResponseDTO>> searchBoard(@RequestParam("title") String title,
-//                                                              @RequestParam(value = "page", defaultValue = "1") int page,
-//                                                              @RequestParam(value = "size", defaultValue = "10") int size) {
-//        Page<BoardResponseDTO> boardResponseDTOS = boardService.searchBoardByTitle(title, Pageable pageable);
-//        return ResponseEntity.ok().body(boardResponseDTOS);
-//    }
 }

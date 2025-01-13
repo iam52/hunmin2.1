@@ -58,8 +58,8 @@ public class BoardRepositoryTest {
 
         Board board = boardRepository.findById(boardId).orElseThrow();
 
-        board.changeTitle(title);
-        board.changeContent(content);
+        board.updateTitle(title);
+        board.updateContent(content);
 
         board = boardRepository.findById(boardId).orElseThrow();
 

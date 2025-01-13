@@ -10,6 +10,8 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class S3FileUploader {
@@ -28,7 +30,6 @@ public class S3FileUploader {
     }
 
     public String uploadImage(MultipartFile multipartFile) throws IOException {
-
         // 파일 검증
         FileValidate.validateImageFile(multipartFile);
 
@@ -52,6 +53,38 @@ public class S3FileUploader {
         } catch (Exception e) {
             throw ErrorCode.IMAGE_FILE_UPLOAD_FAIL.throwException();
         }
+    }
+
+    public List<String> uploadImages(List<MultipartFile> multipartFiles) throws IOException {
+        List<String> imageUrls = new ArrayList<>();
+
+        for (MultipartFile multipartFile : multipartFiles) {
+            // 파일 검증
+            FileValidate.validateImageFile(multipartFile);
+
+            // 파일명 추출 및 변경
+            String originalFileName = multipartFile.getOriginalFilename();
+            String fileName = FileValidate.createUniqueFileName(originalFileName);
+
+            try {
+                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(fileName)
+                        .contentType(multipartFile.getContentType())
+                        .build();
+
+                RequestBody requestBody = RequestBody.fromInputStream(
+                        multipartFile.getInputStream(),
+                        multipartFile.getSize()
+                );
+                s3Client.putObject(putObjectRequest, requestBody);
+                imageUrls.add(getFile(fileName));
+            } catch (Exception e) {
+                throw ErrorCode.IMAGE_FILE_UPLOAD_FAIL.throwException();
+            }
+        }
+
+        return imageUrls;
     }
 
     public String getFile(String filename) {
